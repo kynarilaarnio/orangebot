@@ -8,13 +8,16 @@
     "url": "https://github.com/dregu/orangebot"
   },
   "dependencies": {
-    "ip": "latest",
-    "irc": "^0.5.0",
-    "named-regexp": "latest",
-    "nconf": "latest",
-    "node-telegram-bot-api": "latest",
-    "request": "latest",
-    "simple-rcon": "latest",
-    "steamid": "latest"
+    "ip": "^1.1.5",
+    "irc": "^0.5.2",
+    "named-regexp": "^0.1.1",
+    "nconf": "^0.8.4",
+    "node-telegram-bot-api": "^0.27.1",
+    "request": "^2.81.0",
+    "simple-rcon": "^0.3.1",
+    "steamid": "^1.1.0"
+  },
+  "engines": {
+    "node" : "6.x.x"
   }
 }

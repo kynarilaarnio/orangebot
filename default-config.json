@@ -2,8 +2,8 @@
   "ip": "",
   "port": 1337,
   "admins": [],
-  "rcon_pass": "password",
-  "static": [
+  "rconPass": "password",
+  "statics": [
     {
       "host": "127.0.0.1",
       "port": 27015,
@@ -29,6 +29,8 @@
     ],
     "realname": "Agent Orange"
   },
-  "token": "",
-  "group": ""
+  "telegram": {
+    "token": "",
+    "group": ""
+  }
 }
