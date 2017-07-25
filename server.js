@@ -187,21 +187,21 @@ module.exports = class Server {
 		if (roundNum < 10) roundNum = "0" + roundNum;
 		this.rcon(rcons.RESTORE_ROUND.format('backup_round' + roundNum + '.txt', round));
 		const that = this;
-        setTimeout(function () {
-            that.rcon('say \x054...');
-        }, 1000);
-        setTimeout(function () {
-            that.rcon('say \x063...');
-        }, 2000);
-        setTimeout(function () {
-            that.rcon('say \x102...');
-        }, 3000);
-        setTimeout(function () {
-            that.rcon('say \x0f1...');
-        }, 4000);
-        setTimeout(function () {
-            that.rcon(rcons.LIVE + ';mp_unpause_match');
-        }, 5000);
+		setTimeout(function () {
+			that.rcon('say \x054...');
+		}, 1000);
+		setTimeout(function () {
+			that.rcon('say \x063...');
+		}, 2000);
+		setTimeout(function () {
+			that.rcon('say \x102...');
+		}, 3000);
+		setTimeout(function () {
+			that.rcon('say \x0f1...');
+		}, 4000);
+		setTimeout(function () {
+			that.rcon(rcons.LIVE + ';mp_unpause_match');
+		}, 5000);
 	};
 
 	// Start round
@@ -222,7 +222,7 @@ module.exports = class Server {
 		}
 
 		const message = this.state.stats + "\n" + this.state.maps.join(' ').replace(this.state.map, '*' + this.state.map + '*').replace(/de_/g, '') + "\n*Match ended*";
-        this.cfg.bot.telegramBot.sendMessage(this.cfg.nconf.get('telegram:groupId'), '*Console@' + this.cfg.ip + ':' + this.cfg.port + "*\n" + message, {
+		this.cfg.bot.telegramBot.sendMessage(this.cfg.nconf.get('telegram:groupId'), '*Console@' + this.cfg.ip + ':' + this.cfg.port + "*\n" + message, {
 			parse_mode: 'Markdown'
 		});
 	};
@@ -231,7 +231,7 @@ module.exports = class Server {
 	pause() {
 		if (!this.state.live) return;
 		const message = this.clantag('TERRORIST') + ' - ' + this.clantag('CT') + "\n*Match paused*";
-        this.cfg.bot.telegramBot.sendMessage(this.cfg.nconf.get('telegram:groupId'), '*Console@' + this.cfg.ip + ':' + this.cfg.port + "*\n" + message, {
+		this.cfg.bot.telegramBot.sendMessage(this.cfg.nconf.get('telegram:groupId'), '*Console@' + this.cfg.ip + ':' + this.cfg.port + "*\n" + message, {
 			parse_mode: 'Markdown'
 		});
 		this.rcon(rcons.PAUSE_ENABLED);
@@ -341,7 +341,7 @@ module.exports = class Server {
 					}
 					const that = this;
 					setTimeout(function () {
-                        that.start(vetomaps);
+						that.start(vetomaps);
 					}, 10000);
 				}
 
@@ -387,7 +387,7 @@ module.exports = class Server {
 
 					const that = this;
 					setTimeout(function () {
-                        that.start(vetomaps);
+						that.start(vetomaps);
 					}, 10000);
 				}
 
@@ -445,16 +445,16 @@ module.exports = class Server {
 					}, 9000);
 				}
 				const message = this.stats(false) + "\n" + this.state.maps.join(' ').replace(this.state.map, '*' + this.state.map + '*').replace(/de_/g, '') + "\n*Match started*";
-                this.cfg.bot.telegramBot.sendMessage(this.cfg.nconf.get('telegram:groupid'), '*Console@' + this.cfg.ip + ':' + this.cfg.port + "*\n" + message, {
+				this.cfg.bot.telegramBot.sendMessage(this.cfg.nconf.get('telegram:groupid'), '*Console@' + this.cfg.ip + ':' + this.cfg.port + "*\n" + message, {
 					parse_mode: 'Markdown'
 				});
-                const gotv = this.cfg.nconf.get('gotv');
+				const gotv = this.cfg.nconf.get('gotv');
 				if (gotv[this.cfg.ip][this.cfg.port] !== undefined && Object.keys(this.state.players).length >= 5) {
 					const teams = this.clantag('TERRORIST') + ' - ' + this.clantag('CT');
 					const channels = this.cfg.nconf.get('irc:channels');
 					for (const i in channels) {
 						if (channels.hasOwnProperty(i)) {
-                            this.cfg.bot.ircClient.send('NOTICE', this.cfg.nconf.get('irc:channels')[i], 'Matsi alkaa! (' + teams + ') GOTV osoitteessa ' + gotv[this.cfg.ip][this.cfg.port]);
+							this.cfg.bot.ircClient.send('NOTICE', this.cfg.nconf.get('irc:channels')[i], 'Matsi alkaa! (' + teams + ') GOTV osoitteessa ' + gotv[this.cfg.ip][this.cfg.port]);
 						}
 					}
 				}

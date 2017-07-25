@@ -1,110 +1,110 @@
 // Require dependencies
 const
-    nconf = require('nconf'),
-    fs = require('fs'),
-    irc = require('irc'),
-    named = require('named-regexp').named,
-    dns = require('dns'),
-    dgram = require('dgram'),
-    request = require('request'),
-    udpServer = dgram.createSocket('udp4'),
-    TelegramBot = require('node-telegram-bot-api');
+	nconf = require('nconf'),
+	fs = require('fs'),
+	irc = require('irc'),
+	named = require('named-regexp').named,
+	dns = require('dns'),
+	dgram = require('dgram'),
+	request = require('request'),
+	udpServer = dgram.createSocket('udp4'),
+	TelegramBot = require('node-telegram-bot-api');
 
 // Require bot modules
 const
 	Server = require('./server.js'),
 	Player = require('./player.js'),
-    rcons = require('./rcons.js'),
-    utils = require('./utils.js');
+	rcons = require('./rcons.js'),
+	utils = require('./utils.js');
 
 (function loadConfigs() {
-    const
-        confPath = './config.json',
-        defaults = require('./default-config.json');
+	const
+		confPath = './config.json',
+		defaults = require('./default-config.json');
 
 	// Create configs from defaults if not exists
-    if (!fs.existsSync(confPath)) {
-        fs.writeFileSync(confPath, JSON.stringify(defaults, null, 2));
-    }
+	if (!fs.existsSync(confPath)) {
+		fs.writeFileSync(confPath, JSON.stringify(defaults, null, 2));
+	}
 
-    nconf.file({
-        file: confPath
-    });
+	nconf.file({
+		file: confPath
+	});
 })();
 
 // Read configs
 if(nconf.get('ip') === '') nconf.set('ip', require('ip').address());
 const
 	admins = nconf.get('admins'),
-    statics = nconf.get('statics'),
-    rconPass = nconf.get('rconPass'),
-    whitelist = nconf.get('whitelist'),
-    pool = nconf.get('pool'),
+	statics = nconf.get('statics'),
+	rconPass = nconf.get('rconPass'),
+	whitelist = nconf.get('whitelist'),
+	pool = nconf.get('pool'),
 	telegram = nconf.get('telegram');
 
 // Storing the bot state
 const bot = {
-    admins64: [],
-    servers: {}
+	admins64: [],
+	servers: {}
 };
 
 if (nconf.get('irc')) {
-    bot.ircClient = new irc.Client(nconf.get('irc:server'), nconf.get('irc:nick'), {
-        channels: nconf.get('irc:channels'),
-        realName: nconf.get('irc:realname'),
-        autoRejoin: true
-    });
+	bot.ircClient = new irc.Client(nconf.get('irc:server'), nconf.get('irc:nick'), {
+		channels: nconf.get('irc:channels'),
+		realName: nconf.get('irc:realname'),
+		autoRejoin: true
+	});
 }
 
 if (telegram && telegram.token.length && telegram.groupId.length) {
-    bot.telegramBot = new TelegramBot(telegram.token, {
-        polling: true
-    });
+	bot.telegramBot = new TelegramBot(telegram.token, {
+		polling: true
+	});
 }
 
 function addServer(host, port, pass) {
-    dns.lookup(host, 4, function (err, ip) {
-        bot.servers[ip + ':' + port] = new Server({
-            address: ip + ':' + port,
-            pass: pass,
-            nconf: nconf,
+	dns.lookup(host, 4, function (err, ip) {
+		bot.servers[ip + ':' + port] = new Server({
+			address: ip + ':' + port,
+			pass: pass,
+			nconf: nconf,
 			bot: bot
-        });
-    });
+		});
+	});
 }
 
 
 for (const i in admins) {
-    if (admins.hasOwnProperty(i)) {
-        bot.admins64.push(utils.id64(admins[i]));
-    }
+	if (admins.hasOwnProperty(i)) {
+		bot.admins64.push(utils.id64(admins[i]));
+	}
 }
 
 if(bot.hasOwnProperty('telegramBot')) {
-    bot.telegramBot.on('message', function (msg) {
-        if (!msg.text) return;
+	bot.telegramBot.on('message', function (msg) {
+		if (!msg.text) return;
 
-        // Only listen set group chat
-        if (msg.chat.id !== telegram.groupId) return;
+		// Only listen set group chat
+		if (msg.chat.id !== telegram.groupId) return;
 
-        //const name = msg.from.username || msg.from.first_name;
-        const message = msg.text;
+		//const name = msg.from.username || msg.from.first_name;
+		const message = msg.text;
 
-        // Message have to be reply
-        if (msg.reply_to_message) {
-            const re = named(/@(:<addr>\d+\.\d+\.\d+\.\d+:\d+)/m);
-            const match = re.exec(msg.reply_to_message.text);
-            if (match !== null) {
-                const addr = match.capture('addr');
-                if (message.match(/^!/)) {
-                    bot.servers[addr].say(message);
-                } else {
-                    bot.servers[addr].chat(' \x06Admin: \x10' + message);
-                    bot.servers[addr].center('Admin: ' + message);
-                }
-            }
-        }
-    });
+		// Message have to be reply
+		if (msg.reply_to_message) {
+			const re = named(/@(:<addr>\d+\.\d+\.\d+\.\d+:\d+)/m);
+			const match = re.exec(msg.reply_to_message.text);
+			if (match !== null) {
+				const addr = match.capture('addr');
+				if (message.match(/^!/)) {
+					bot.servers[addr].say(message);
+				} else {
+					bot.servers[addr].chat(' \x06Admin: \x10' + message);
+					bot.servers[addr].center('Admin: ' + message);
+				}
+			}
+		}
+	});
 }
 
 udpServer.on('message', function (msg, info) {
@@ -118,11 +118,11 @@ udpServer.on('message', function (msg, info) {
 
 	if (bot.servers[addr] === undefined && addr.match(/172.17.0./)) {
 		bot.servers[addr] = new Server({
-            address: String(addr),
-            pass: String(rconPass),
-            nconf: nconf,
+			address: String(addr),
+			pass: String(rconPass),
+			nconf: nconf,
 			bot: bot
-        });
+		});
 	}
 
 	// Connected
@@ -255,17 +255,17 @@ udpServer.on('message', function (msg, info) {
 			case 'admin':
 				const message = param.join(' ').replace('!admin ', '');
 				if (bot.hasOwnProperty('telegramBot')) {
-                    bot.telegramBot.sendMessage(telegram.groupId, '*' + match.capture('user_name') + '@' + addr + "*\n" + message + "\n*Admin called*", {
-                        parse_mode: 'Markdown'
-                    });
+					bot.telegramBot.sendMessage(telegram.groupId, '*' + match.capture('user_name') + '@' + addr + "*\n" + message + "\n*Admin called*", {
+						parse_mode: 'Markdown'
+					});
 				} else {
-                    bot.servers[addr].chat(' \x05Telegram bot is not set.');
+					bot.servers[addr].chat(' \x05Telegram bot is not set.');
 				}
 				break;
-            case 'restore':
+			case 'restore':
 			case 'replay':
-                if (isAdmin) bot.servers[addr].restore(param);
-                break;
+				if (isAdmin) bot.servers[addr].restore(param);
+				break;
 			case 'status':
 			case 'stats':
 			case 'score':
@@ -347,23 +347,23 @@ setInterval(function () {
 	for (const i in bot.servers) {
 		if (bot.servers.hasOwnProperty(i)) {
 
-            const now = new Date().getTime();
-            if (bot.servers[i].lastlog < now - 1000 * 60 * 10 && bot.servers[i].state.players.length < 3) {
-                console.log('Dropping idle server ' + i);
-                delete bot.servers[i];
-                continue;
-            }
+			const now = new Date().getTime();
+			if (bot.servers[i].lastlog < now - 1000 * 60 * 10 && bot.servers[i].state.players.length < 3) {
+				console.log('Dropping idle server ' + i);
+				delete bot.servers[i];
+				continue;
+			}
 
-            if (!bot.servers[i].state.live && bot.servers[i].state.pool.length === 0) {
-                if (bot.servers[i].state.knife) {
-                    bot.servers[i].rcon(rcons.WARMUP_KNIFE);
-                } else {
-                    bot.servers[i].rcon(rcons.WARMUP);
-                }
-            } else if (bot.servers[i].state.paused && bot.servers[i].state.freeze) {
-                bot.servers[i].rcon(rcons.MATCH_PAUSED);
-            }
-        }
+			if (!bot.servers[i].state.live && bot.servers[i].state.pool.length === 0) {
+				if (bot.servers[i].state.knife) {
+					bot.servers[i].rcon(rcons.WARMUP_KNIFE);
+				} else {
+					bot.servers[i].rcon(rcons.WARMUP);
+				}
+			} else if (bot.servers[i].state.paused && bot.servers[i].state.freeze) {
+				bot.servers[i].rcon(rcons.MATCH_PAUSED);
+			}
+		}
 	}
 }, 15000);
 
@@ -371,7 +371,7 @@ setInterval(function () {
 setInterval(function () {
 	for (const  i in bot.servers) {
 		if (bot.servers.hasOwnProperty(i) && !bot.servers[i].state.live && bot.servers[i].state.pool.length > 0) {
-			bot.servers[i].rcon('tv_msg Ban: ' + bot.servers[i].state.banned.join(', ') + '                                                                                                        Left: ' + bot.servers[i].state.pool.join(', '));
+			bot.servers[i].rcon('tv_msg Ban: ' + bot.servers[i].state.banned.join(', ') + '																										Left: ' + bot.servers[i].state.pool.join(', '));
 		}
 	}
 }, 2000);
@@ -388,9 +388,9 @@ setInterval(function () {
 
 // Add static servers
 for (const i in statics) {
-    if (statics.hasOwnProperty(i)) {
-        addServer(statics[i].host, statics[i].port, statics[i].pass);
-    }
+	if (statics.hasOwnProperty(i)) {
+		addServer(statics[i].host, statics[i].port, statics[i].pass);
+	}
 }
 
 // Bind UDP server

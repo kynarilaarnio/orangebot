@@ -60,10 +60,10 @@ String.prototype.format = function () {
 };
 
 module.exports = {
-    id64: id64,
-    clean: clean,
-    cleandemo: cleandemo,
-    cleansay: cleansay,
-    getRandom: getRandom,
-    whitelisted: whitelisted
+	id64: id64,
+	clean: clean,
+	cleandemo: cleandemo,
+	cleansay: cleansay,
+	getRandom: getRandom,
+	whitelisted: whitelisted
 };
