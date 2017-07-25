@@ -92,7 +92,7 @@ module.exports = class Server {
 			}
 			conn.close();
 		}).on('error', function (err) {
-			console.err(err);
+			console.error(err);
 		}).connect();
 	};
 
@@ -253,7 +253,7 @@ module.exports = class Server {
 			port: that.cfg.port,
 			password: that.cfg.pass
 		}).on('error', function (err) {
-			console.err(err);
+			console.error(err);
 		}).exec('status', function (res) {
 			// Get current map
 			let re = named(/map\s+:\s+(:<map>.*?)\s/), match = re.exec(res.body);
