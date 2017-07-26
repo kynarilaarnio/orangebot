@@ -185,12 +185,12 @@ module.exports = class Server {
 	// Restore round
 	restore(round) {
 		if (round !== 'undefined') let roundNum = parseInt(round);
-        if (roundNum >= this.state.round || !this.state.live) {
-            this.rcon('say That round has not been played yet!');
-            return;
-        }
-        this.state.round = roundNum;
-        if (roundNum < 10) roundNum = "0" + roundNum;
+		if (roundNum >= this.state.round || !this.state.live) {
+			this.rcon('say That round has not been played yet!');
+			return;
+		}
+		this.state.round = roundNum;
+		if (roundNum < 10) roundNum = "0" + roundNum;
 		this.rcon(rcons.RESTORE_ROUND.format('backup_round' + roundNum + '.txt', round));
 		const that = this;
 		setTimeout(function () {
