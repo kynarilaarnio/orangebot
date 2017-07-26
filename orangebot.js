@@ -335,6 +335,15 @@ udpServer.on('message', function (msg, info) {
 			case 'pick':
 				bot.servers[addr].pick(param, match.capture('user_team'));
 				break;
+			case 'bo1':
+				if (isAdmin) bot.servers[addr].matchformat('bo1');
+				break;
+			case 'bo3':
+				if (isAdmin) bot.servers[addr].matchformat('bo3');
+				break;
+			case 'matchformat':
+				if (isAdmin) bot.servers[addr].matchformat(param[0]);
+				break;
 			default:
 				break;
 		}

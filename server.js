@@ -45,7 +45,8 @@ module.exports = class Server {
 			pool: [],
 			banned: [],
 			picked: [],
-			stats: ''
+			stats: '',
+			format: 'bo1'
 		};
 
 		this.setup();
@@ -183,8 +184,13 @@ module.exports = class Server {
 
 	// Restore round
 	restore(round) {
-		let roundNum = parseInt(round);
-		if (roundNum < 10) roundNum = "0" + roundNum;
+		if (round !== 'undefined') let roundNum = parseInt(round);
+        if (roundNum >= this.state.round || !this.state.live) {
+            this.rcon('say That round has not been played yet!');
+            return;
+        }
+        this.state.round = roundNum;
+        if (roundNum < 10) roundNum = "0" + roundNum;
 		this.rcon(rcons.RESTORE_ROUND.format('backup_round' + roundNum + '.txt', round));
 		const that = this;
 		setTimeout(function () {
@@ -312,11 +318,12 @@ module.exports = class Server {
 			this.chat(' \x10It\'s not your turn, ' + this.clantag(team) + '!');
 			return;
 		}
+		if (this.state.live) return;
 
 		map = map.join(' ');
 		let picked = '';
 
-		if ([5,4].includes(this.state.pool.length) && map.length > 2) {
+		if ([5,4].includes(this.state.pool.length) && map.length > 2 && this.state.format === 'bo3') {
 			for (let i = 0; i < this.state.pool.length; i++) {
 				if (this.state.pool[i].match(map)) {
 					picked = this.state.pool.splice(i, 1);
@@ -358,9 +365,10 @@ module.exports = class Server {
 			this.chat(' \x10It\'s not your turn, ' + this.clantag(team) + '!');
 			return;
 		}
+		if (this.state.live) return;
 		map = map.join(' ');
 		let banned = '';
-		if ([7,6,3,2].includes(this.state.pool.length) && map.length > 2) {
+		if ([7,6,3,2].includes(this.state.pool.length) && map.length > 2 || this.state.format === 'bo1') {
 			for (let i = 0; i < this.state.pool.length; i++) {
 				if (this.state.pool[i].match(map)) {
 					banned = this.state.pool.splice(i, 1);
@@ -375,11 +383,11 @@ module.exports = class Server {
 				if (this.state.pool.length > 1) {
 					if (this.state.banner === 'CT') this.state.banner = 'TERRORIST';
 					else this.state.banner = 'CT';
-					const nextcmd = ([6,2].includes(this.state.pool.length) ? 'ban' : 'pick');
+					const nextcmd = ([6,2].includes(this.state.pool.length) || this.state.format === 'bo1' ? 'ban' : 'pick');
 					message += this.clantag(this.state.banner) + ', \x06!' + nextcmd + '\x10 the next map. (\x06' + this.state.pool.join(', ') + '\x10)';
 				} else {
 					this.state.picked.push(this.state.pool[0]);
-					message += 'Starting a BO3 match. (\x06' + this.state.picked.join(', ') + '\x10)';
+					message += 'Starting a ' + this.state.format + ' match. (\x06' + this.state.picked.join(', ') + '\x10)';
 					const vetomaps = [];
 					for (let i = 0; i < this.state.picked.length; i++) {
 						vetomaps.push('de_'+this.state.picked[i]);
@@ -397,6 +405,21 @@ module.exports = class Server {
 			this.chat(' \x10I don\'t undestand.');
 		}
 	};
+
+	matchformat(newFormat){
+		if (newFormat === undefined){
+			this.rcon('say \x10Current format is: ' + this.state.format);
+			return;
+		}
+		if (newFormat === 'bo1' || newFormat === 'bo3'){
+			this.state.format = newFormat;
+			this.chat('\x10Format changed.')
+		}
+		else {
+			this.chat('\x10Wrong format!');
+		}
+
+	}
 
 	// Set team to be ready
 	ready(team) {
@@ -560,6 +583,7 @@ module.exports = class Server {
 	// Print server state
 	debug() {
 		this.rcon('say \x10round: ' + this.state.round + ', live: ' + this.state.live + ', paused: ' + this.state.paused + ', freeze: ' + this.state.freeze + ', knife: ' + this.state.knife + ', knifewinner: ' + this.state.knifewinner + ', ready: T:' + this.state.ready.TERRORIST + ', CT:' + this.state.ready.CT + ', unpause: T:' + this.state.unpause.TERRORIST + ', CT:' + this.state.unpause.CT + ', pool: ' + this.state.pool.join(','));
+		this.rcon('say format: ' + this.state.format);
 		this.stats(true);
 	};
 
