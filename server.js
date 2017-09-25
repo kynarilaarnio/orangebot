@@ -1,14 +1,14 @@
-const named = require('named-regexp').named,
-  rcon = require('simple-rcon');
+const named = require("named-regexp").named,
+  rcon = require("simple-rcon");
 
-const rcons = require('./rcons.js'),
-  utils = require('./utils.js');
+const rcons = require("./rcons.js"),
+  utils = require("./utils.js");
 
 module.exports = class Server {
   constructor(cfg) {
     this.cfg = {
-      ip: cfg.address.split(':')[0],
-      port: cfg.address.split(':')[1] || 27015,
+      ip: cfg.address.split(":")[0],
+      port: cfg.address.split(":")[1] || 27015,
       pass: cfg.pass,
       adminip: cfg.adminip,
       adminid: cfg.adminid,
@@ -19,7 +19,7 @@ module.exports = class Server {
 
     this.state = {
       live: false,
-      map: '',
+      map: "",
       maps: [],
       knife: false,
       score: [],
@@ -39,12 +39,12 @@ module.exports = class Server {
       admins: [],
       queue: [],
       players: {},
-      banner: '',
+      banner: "",
       pool: [],
       banned: [],
       picked: [],
-      stats: '',
-      format: 'bo1'
+      stats: "",
+      format: "bo1"
     };
 
     this.setup();
@@ -57,13 +57,13 @@ module.exports = class Server {
     }
 
     this.rcon(
-      'sv_rcon_whitelist_address ' +
-        this.cfg.nconf.get('ip') +
-        ';logaddress_add ' +
-        this.cfg.nconf.get('ip') +
-        ':' +
-        this.cfg.nconf.get('port') +
-        ';log on'
+      "sv_rcon_whitelist_address " +
+        this.cfg.nconf.get("ip") +
+        ";logaddress_add " +
+        this.cfg.nconf.get("ip") +
+        ":" +
+        this.cfg.nconf.get("port") +
+        ";log on"
     );
     this.status();
 
@@ -71,12 +71,12 @@ module.exports = class Server {
     setTimeout(function() {
       that.chat(
         " \x10Hi! I'm OrangeBot." +
-          (that.state.admins.length > 0 ? ' \x0e' + that.state.admins.join(', ') + '\x10 is now my admin.' : '')
+          (that.state.admins.length > 0 ? " \x0e" + that.state.admins.join(", ") + "\x10 is now my admin." : "")
       );
-      that.chat(' \x10Start a match with \x06!start map \x08map map');
+      that.chat(" \x10Start a match with \x06!start map \x08map map");
     }, 1000);
 
-    console.log('Connected to ' + this.cfg.ip + ':' + this.cfg.port + ', pass ' + this.cfg.pass);
+    console.log("Connected to " + this.cfg.ip + ":" + this.cfg.port + ", pass " + this.cfg.pass);
   }
 
   // Queue RCON command
@@ -94,8 +94,8 @@ module.exports = class Server {
       port: that.cfg.port,
       password: that.cfg.pass
     })
-      .on('authenticated', function() {
-        cmd = cmd.split(';');
+      .on("authenticated", function() {
+        cmd = cmd.split(";");
         for (const i in cmd) {
           if (cmd.hasOwnProperty(i)) {
             conn.exec(String(cmd[i]));
@@ -103,7 +103,7 @@ module.exports = class Server {
         }
         conn.close();
       })
-      .on('error', function(err) {
+      .on("error", function(err) {
         console.error(err);
       })
       .connect();
@@ -111,13 +111,13 @@ module.exports = class Server {
 
   // Try solve team name
   clantag(team) {
-    if (team !== 'TERRORIST' && team !== 'CT') {
+    if (team !== "TERRORIST" && team !== "CT") {
       return team;
     }
     const tags = {};
-    let ret = 'Team';
-    if (team === 'TERRORIST') ret = rcons.T;
-    else if (team === 'CT') ret = rcons.CT;
+    let ret = "Team";
+    if (team === "TERRORIST") ret = rcons.T;
+    else if (team === "CT") ret = rcons.CT;
 
     for (const i in this.state.players) {
       if (
@@ -139,8 +139,8 @@ module.exports = class Server {
       }
     }
     ret = utils.clean(ret);
-    if (team === 'CT' && this.clantag('TERRORIST') === ret) {
-      ret = ret + '2';
+    if (team === "CT" && this.clantag("TERRORIST") === ret) {
+      ret = ret + "2";
     }
     return ret;
   }
@@ -154,8 +154,8 @@ module.exports = class Server {
 
   // ???
   stats(tochat) {
-    const team1 = this.clantag('TERRORIST');
-    const team2 = this.clantag('CT');
+    const team1 = this.clantag("TERRORIST");
+    const team2 = this.clantag("CT");
     const stat = {};
     stat[team1] = [];
     stat[team2] = [];
@@ -165,16 +165,16 @@ module.exports = class Server {
         if (this.state.score[this.state.maps[i]][team1] !== undefined) {
           stat[team1][i] = this.state.score[this.state.maps[i]][team1];
         } else {
-          stat[team1][i] = 'x';
+          stat[team1][i] = "x";
         }
         if (this.state.score[this.state.maps[i]][team2] !== undefined) {
           stat[team2][i] = this.state.score[this.state.maps[i]][team2];
         } else {
-          stat[team2][i] = 'x';
+          stat[team2][i] = "x";
         }
       } else {
-        stat[team1][i] = 'x';
-        stat[team2][i] = 'x';
+        stat[team1][i] = "x";
+        stat[team2][i] = "x";
       }
     }
 
@@ -182,12 +182,12 @@ module.exports = class Server {
     const scores = [];
 
     for (let j = 0; j < this.state.maps.length; j++) {
-      maps.push(this.state.maps[j] + ' ' + stat[team1][j] + '-' + stat[team2][j]);
-      scores.push(stat[team1][j] + '-' + stat[team2][j]);
+      maps.push(this.state.maps[j] + " " + stat[team1][j] + "-" + stat[team2][j]);
+      scores.push(stat[team1][j] + "-" + stat[team2][j]);
     }
 
-    const out = team1 + ' [' + scores.join(', ') + '] ' + team2;
-    const chat = ' \x10' + team1 + ' [\x06' + maps.join(', ') + '\x10] ' + team2;
+    const out = team1 + " [" + scores.join(", ") + "] " + team2;
+    const chat = " \x10" + team1 + " [\x06" + maps.join(", ") + "\x10] " + team2;
 
     if (tochat) {
       this.chat(chat);
@@ -197,38 +197,38 @@ module.exports = class Server {
     }
 
     return out
-      .replace(/\x10/g, '')
-      .replace(/\x06/g, '')
-      .replace(/_/g, '\\_');
+      .replace(/\x10/g, "")
+      .replace(/\x06/g, "")
+      .replace(/_/g, "\\_");
   }
 
   // Restore round
   restore(round) {
-    if (round !== 'undefined') {
+    if (round !== "undefined") {
       let roundNum = parseInt(round);
     }
     if (roundNum >= this.state.round || !this.state.live) {
-      this.rcon('say That round has not been played yet!');
+      this.rcon("say That round has not been played yet!");
       return;
     }
     this.state.round = roundNum;
-    if (roundNum < 10) roundNum = '0' + roundNum;
-    this.rcon(rcons.RESTORE_ROUND.format('backup_round' + roundNum + '.txt', round));
+    if (roundNum < 10) roundNum = "0" + roundNum;
+    this.rcon(rcons.RESTORE_ROUND.format("backup_round" + roundNum + ".txt", round));
     const that = this;
     setTimeout(function() {
-      that.rcon('say \x054...');
+      that.rcon("say \x054...");
     }, 1000);
     setTimeout(function() {
-      that.rcon('say \x063...');
+      that.rcon("say \x063...");
     }, 2000);
     setTimeout(function() {
-      that.rcon('say \x102...');
+      that.rcon("say \x102...");
     }, 3000);
     setTimeout(function() {
-      that.rcon('say \x0f1...');
+      that.rcon("say \x0f1...");
     }, 4000);
     setTimeout(function() {
-      that.rcon(rcons.LIVE + ';mp_unpause_match');
+      that.rcon(rcons.LIVE + ";mp_unpause_match");
     }, 5000);
   }
 
@@ -242,30 +242,30 @@ module.exports = class Server {
 
   // Match end
   win() {
-    const channels = this.cfg.nconf.get('irc:channels');
+    const channels = this.cfg.nconf.get("irc:channels");
     for (const i in channels) {
       if (channels.hasOwnProperty(i)) {
         this.cfg.bot.ircClient.send(
-          'NOTICE',
-          this.cfg.nconf.get('irc:channels')[i],
-          'Matsi päättyi! (' + this.state.stats + ')'
+          "NOTICE",
+          this.cfg.nconf.get("irc:channels")[i],
+          "Matsi päättyi! (" + this.state.stats + ")"
         );
       }
     }
 
     const message =
       this.state.stats +
-      '\n' +
+      "\n" +
       this.state.maps
-        .join(' ')
-        .replace(this.state.map, '*' + this.state.map + '*')
-        .replace(/de_/g, '') +
-      '\n*Match ended*';
+        .join(" ")
+        .replace(this.state.map, "*" + this.state.map + "*")
+        .replace(/de_/g, "") +
+      "\n*Match ended*";
     this.cfg.bot.telegramBot.sendMessage(
-      this.cfg.nconf.get('telegram:groupId'),
-      '*Console@' + this.cfg.ip + ':' + this.cfg.port + '*\n' + message,
+      this.cfg.nconf.get("telegram:groupId"),
+      "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message,
       {
-        parse_mode: 'Markdown'
+        parse_mode: "Markdown"
       }
     );
   }
@@ -273,12 +273,12 @@ module.exports = class Server {
   // Pause match
   pause() {
     if (!this.state.live) return;
-    const message = this.clantag('TERRORIST') + ' - ' + this.clantag('CT') + '\n*Match paused*';
+    const message = this.clantag("TERRORIST") + " - " + this.clantag("CT") + "\n*Match paused*";
     this.cfg.bot.telegramBot.sendMessage(
-      this.cfg.nconf.get('telegram:groupId'),
-      '*Console@' + this.cfg.ip + ':' + this.cfg.port + '*\n' + message,
+      this.cfg.nconf.get("telegram:groupId"),
+      "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message,
       {
-        parse_mode: 'Markdown'
+        parse_mode: "Markdown"
       }
     );
     this.rcon(rcons.PAUSE_ENABLED);
@@ -300,15 +300,15 @@ module.exports = class Server {
       port: that.cfg.port,
       password: that.cfg.pass
     })
-      .on('error', function(err) {
+      .on("error", function(err) {
         console.error(err);
       })
-      .exec('status', function(res) {
+      .exec("status", function(res) {
         // Get current map
         let re = named(/map\s+:\s+(:<map>.*?)\s/),
           match = re.exec(res.body);
         if (match !== null) {
-          const map = match.capture('map');
+          const map = match.capture("map");
 
           if (that.state.maps.indexOf(map) >= 0) {
             that.state.map = map;
@@ -321,7 +321,7 @@ module.exports = class Server {
         }
 
         // ???
-        const regex = new RegExp('"(:<user_name>.*?)" (:<steam_id>STEAM_.*?) .*?' + that.cfg.adminip + ':', '');
+        const regex = new RegExp('"(:<user_name>.*?)" (:<steam_id>STEAM_.*?) .*?' + that.cfg.adminip + ":", "");
         re = named(regex);
         match = re.exec(res.body);
         if (match !== null) {
@@ -346,31 +346,31 @@ module.exports = class Server {
     if (maps.length > 0) {
       this.state.maps = maps;
       if (this.state.map !== maps[0]) {
-        this.rcon('changelevel ' + this.state.maps[0]);
+        this.rcon("changelevel " + this.state.maps[0]);
       } else {
         this.newmap(maps[0], 0);
       }
     } else {
-      this.state.pool = this.cfg.nconf.get('pool').slice(0);
+      this.state.pool = this.cfg.nconf.get("pool").slice(0);
       this.state.banned = [];
       this.state.picked = [];
-      this.state.banner = utils.getRandom(['CT', 'TERRORIST']);
-      this.chat(rcons.VETO.format(this.clantag(this.state.banner), this.state.pool.join(', ')));
+      this.state.banner = utils.getRandom(["CT", "TERRORIST"]);
+      this.chat(rcons.VETO.format(this.clantag(this.state.banner), this.state.pool.join(", ")));
     }
   }
 
   // Pick map
   pick(map, team) {
     if (this.state.banner !== team) {
-      this.chat(" \x10It's not your turn, " + this.clantag(team) + '!');
+      this.chat(" \x10It's not your turn, " + this.clantag(team) + "!");
       return;
     }
     if (this.state.live) return;
 
-    map = map.join(' ');
-    let picked = '';
+    map = map.join(" ");
+    let picked = "";
 
-    if ([5, 4].includes(this.state.pool.length) && map.length > 2 && this.state.format === 'bo3') {
+    if ([5, 4].includes(this.state.pool.length) && map.length > 2 && this.state.format === "bo3") {
       for (let i = 0; i < this.state.pool.length; i++) {
         if (this.state.pool[i].match(map)) {
           picked = this.state.pool.splice(i, 1);
@@ -378,26 +378,26 @@ module.exports = class Server {
         }
       }
 
-      if (picked !== '') {
+      if (picked !== "") {
         this.state.picked.push(picked);
-        let message = ' \x10' + this.clantag(this.state.banner) + ' picked ' + picked + '. ';
+        let message = " \x10" + this.clantag(this.state.banner) + " picked " + picked + ". ";
         if (this.state.pool.length > 1) {
-          if (this.state.banner === 'CT') this.state.banner = 'TERRORIST';
-          else this.state.banner = 'CT';
-          const nextcmd = this.state.pool.length === 4 ? 'pick' : 'ban';
+          if (this.state.banner === "CT") this.state.banner = "TERRORIST";
+          else this.state.banner = "CT";
+          const nextcmd = this.state.pool.length === 4 ? "pick" : "ban";
           message +=
             this.clantag(this.state.banner) +
-            ', \x06!' +
+            ", \x06!" +
             nextcmd +
-            '\x10 the next map. (\x06' +
-            this.state.pool.join(', ') +
-            '\x10)';
+            "\x10 the next map. (\x06" +
+            this.state.pool.join(", ") +
+            "\x10)";
         } else {
           this.state.picked.push(this.state.pool[0]);
-          message += 'Starting a BO3 match. (\x06' + this.state.picked.join(', ') + '\x10)';
+          message += "Starting a BO3 match. (\x06" + this.state.picked.join(", ") + "\x10)";
           const vetomaps = [];
           for (let i = 0; i < this.state.picked.length; i++) {
-            vetomaps.push('de_' + this.state.picked[i]);
+            vetomaps.push("de_" + this.state.picked[i]);
           }
           const that = this;
           setTimeout(function() {
@@ -415,13 +415,13 @@ module.exports = class Server {
   // Ban map
   ban(map, team) {
     if (this.state.banner !== team) {
-      this.chat(" \x10It's not your turn, " + this.clantag(team) + '!');
+      this.chat(" \x10It's not your turn, " + this.clantag(team) + "!");
       return;
     }
     if (this.state.live) return;
-    map = map.join(' ');
-    let banned = '';
-    if (([7, 6, 3, 2].includes(this.state.pool.length) && map.length > 2) || this.state.format === 'bo1') {
+    map = map.join(" ");
+    let banned = "";
+    if (([7, 6, 3, 2].includes(this.state.pool.length) && map.length > 2) || this.state.format === "bo1") {
       for (let i = 0; i < this.state.pool.length; i++) {
         if (this.state.pool[i].match(map)) {
           banned = this.state.pool.splice(i, 1);
@@ -429,27 +429,27 @@ module.exports = class Server {
         }
       }
 
-      if (banned !== '') {
+      if (banned !== "") {
         this.state.banned.push(banned);
-        let message = ' \x10' + this.clantag(this.state.banner) + ' banned ' + banned + '. ';
+        let message = " \x10" + this.clantag(this.state.banner) + " banned " + banned + ". ";
 
         if (this.state.pool.length > 1) {
-          if (this.state.banner === 'CT') this.state.banner = 'TERRORIST';
-          else this.state.banner = 'CT';
-          const nextcmd = [6, 2].includes(this.state.pool.length) || this.state.format === 'bo1' ? 'ban' : 'pick';
+          if (this.state.banner === "CT") this.state.banner = "TERRORIST";
+          else this.state.banner = "CT";
+          const nextcmd = [6, 2].includes(this.state.pool.length) || this.state.format === "bo1" ? "ban" : "pick";
           message +=
             this.clantag(this.state.banner) +
-            ', \x06!' +
+            ", \x06!" +
             nextcmd +
-            '\x10 the next map. (\x06' +
-            this.state.pool.join(', ') +
-            '\x10)';
+            "\x10 the next map. (\x06" +
+            this.state.pool.join(", ") +
+            "\x10)";
         } else {
           this.state.picked.push(this.state.pool[0]);
-          message += 'Starting a ' + this.state.format + ' match. (\x06' + this.state.picked.join(', ') + '\x10)';
+          message += "Starting a " + this.state.format + " match. (\x06" + this.state.picked.join(", ") + "\x10)";
           const vetomaps = [];
           for (let i = 0; i < this.state.picked.length; i++) {
-            vetomaps.push('de_' + this.state.picked[i]);
+            vetomaps.push("de_" + this.state.picked[i]);
           }
 
           const that = this;
@@ -467,14 +467,14 @@ module.exports = class Server {
 
   matchformat(newFormat) {
     if (newFormat === undefined) {
-      this.rcon('say \x10Current format is: ' + this.state.format);
+      this.rcon("say \x10Current format is: " + this.state.format);
       return;
     }
-    if (newFormat === 'bo1' || newFormat === 'bo3') {
+    if (newFormat === "bo1" || newFormat === "bo3") {
       this.state.format = newFormat;
-      this.chat('\x10Format changed.');
+      this.chat("\x10Format changed.");
     } else {
-      this.chat('\x10Wrong format!');
+      this.chat("\x10Wrong format!");
     }
   }
 
@@ -522,19 +522,19 @@ module.exports = class Server {
         this.state.live = true;
         this.state.round = 0;
         const demo =
-          'matches/' +
+          "matches/" +
           new Date()
             .toISOString()
-            .replace(/T/, '_')
-            .replace(/:/g, '-')
-            .replace(/\..+/, '') +
-          '_' +
+            .replace(/T/, "_")
+            .replace(/:/g, "-")
+            .replace(/\..+/, "") +
+          "_" +
           this.state.map +
-          '_' +
-          utils.cleandemo(this.clantag('TERRORIST')) +
-          '-' +
-          utils.cleandemo(this.clantag('CT')) +
-          '.dem';
+          "_" +
+          utils.cleandemo(this.clantag("TERRORIST")) +
+          "-" +
+          utils.cleandemo(this.clantag("CT")) +
+          ".dem";
         const that = this;
         if (this.state.knife) {
           this.rcon(rcons.KNIFE_STARTING.format(demo));
@@ -549,44 +549,44 @@ module.exports = class Server {
         }
         const message =
           this.stats(false) +
-          '\n' +
+          "\n" +
           this.state.maps
-            .join(' ')
-            .replace(this.state.map, '*' + this.state.map + '*')
-            .replace(/de_/g, '') +
-          '\n*Match started*';
+            .join(" ")
+            .replace(this.state.map, "*" + this.state.map + "*")
+            .replace(/de_/g, "") +
+          "\n*Match started*";
         this.cfg.bot.telegramBot.sendMessage(
-          this.cfg.nconf.get('telegram:groupid'),
-          '*Console@' + this.cfg.ip + ':' + this.cfg.port + '*\n' + message,
+          this.cfg.nconf.get("telegram:groupid"),
+          "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message,
           {
-            parse_mode: 'Markdown'
+            parse_mode: "Markdown"
           }
         );
-        const gotv = this.cfg.nconf.get('gotv');
+        const gotv = this.cfg.nconf.get("gotv");
         if (gotv[this.cfg.ip][this.cfg.port] !== undefined && Object.keys(this.state.players).length >= 5) {
-          const teams = this.clantag('TERRORIST') + ' - ' + this.clantag('CT');
-          const channels = this.cfg.nconf.get('irc:channels');
+          const teams = this.clantag("TERRORIST") + " - " + this.clantag("CT");
+          const channels = this.cfg.nconf.get("irc:channels");
           for (const i in channels) {
             if (channels.hasOwnProperty(i)) {
               this.cfg.bot.ircClient.send(
-                'NOTICE',
-                this.cfg.nconf.get('irc:channels')[i],
-                'Matsi alkaa! (' + teams + ') GOTV osoitteessa ' + gotv[this.cfg.ip][this.cfg.port]
+                "NOTICE",
+                this.cfg.nconf.get("irc:channels")[i],
+                "Matsi alkaa! (" + teams + ") GOTV osoitteessa " + gotv[this.cfg.ip][this.cfg.port]
               );
             }
           }
         }
         setTimeout(function() {
-          that.chat(' \x054...');
+          that.chat(" \x054...");
         }, 1000);
         setTimeout(function() {
-          that.chat(' \x063...');
+          that.chat(" \x063...");
         }, 2000);
         setTimeout(function() {
-          that.chat(' \x102...');
+          that.chat(" \x102...");
         }, 3000);
         setTimeout(function() {
-          that.chat(' \x0f1...');
+          that.chat(" \x0f1...");
         }, 4000);
         setTimeout(function() {
           that.rcon(rcons.LIVE);
@@ -612,7 +612,7 @@ module.exports = class Server {
     const that = this;
     setTimeout(function() {
       if (index >= 0 && that.state.maps[index + 1] !== undefined) {
-        that.rcon('nextlevel ' + that.state.maps[index + 1]);
+        that.rcon("nextlevel " + that.state.maps[index + 1]);
       } else {
         that.rcon('nextlevel ""');
       }
@@ -637,15 +637,15 @@ module.exports = class Server {
   // ???
   score(score) {
     const tagscore = {};
-    tagscore[this.clantag('CT')] = score.CT;
-    tagscore[this.clantag('TERRORIST')] = score.TERRORIST;
+    tagscore[this.clantag("CT")] = score.CT;
+    tagscore[this.clantag("TERRORIST")] = score.TERRORIST;
     this.state.score[this.state.map] = tagscore;
     this.stats(false);
 
     if (score.TERRORIST + score.CT === 1 && this.state.knife) {
-      this.state.knifewinner = score.TERRORIST === 1 ? 'TERRORIST' : 'CT';
+      this.state.knifewinner = score.TERRORIST === 1 ? "TERRORIST" : "CT";
       this.state.knife = false;
-      this.rcon(rcons.KNIFE_WON.format(this.state.knifewinner === 'TERRORIST' ? rcons.T : rcons.CT));
+      this.rcon(rcons.KNIFE_WON.format(this.state.knifewinner === "TERRORIST" ? rcons.T : rcons.CT));
     } else if (this.state.paused) {
       this.rcon(rcons.MATCH_PAUSED);
     }
@@ -678,35 +678,35 @@ module.exports = class Server {
   // Print server state
   debug() {
     this.rcon(
-      'say \x10round: ' +
+      "say \x10round: " +
         this.state.round +
-        ', live: ' +
+        ", live: " +
         this.state.live +
-        ', paused: ' +
+        ", paused: " +
         this.state.paused +
-        ', freeze: ' +
+        ", freeze: " +
         this.state.freeze +
-        ', knife: ' +
+        ", knife: " +
         this.state.knife +
-        ', knifewinner: ' +
+        ", knifewinner: " +
         this.state.knifewinner +
-        ', ready: T:' +
+        ", ready: T:" +
         this.state.ready.TERRORIST +
-        ', CT:' +
+        ", CT:" +
         this.state.ready.CT +
-        ', unpause: T:' +
+        ", unpause: T:" +
         this.state.unpause.TERRORIST +
-        ', CT:' +
+        ", CT:" +
         this.state.unpause.CT +
-        ', pool: ' +
-        this.state.pool.join(',')
+        ", pool: " +
+        this.state.pool.join(",")
     );
-    this.rcon('say format: ' + this.state.format);
+    this.rcon("say format: " + this.state.format);
     this.stats(true);
   }
 
   say(msg) {
-    this.rcon('say ' + utils.cleansay(msg));
+    this.rcon("say " + utils.cleansay(msg));
   }
 
   chat(msg) {
@@ -732,7 +732,7 @@ module.exports = class Server {
     this.state.knifewinner = false;
     this.state.knife = true;
     this.state.pool = [];
-    this.state.banner = '';
+    this.state.banner = "";
     this.state.round = 0;
     this.rcon(rcons.CONFIG);
   }
