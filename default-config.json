@@ -11,22 +11,12 @@
     }
   ],
   "whitelist": [],
-  "pool": [
-    "cache",
-    "cbble",
-    "inferno",
-    "mirage",
-    "nuke",
-    "overpass",
-    "train"
-  ],
+  "pool": ["cache", "cbble", "inferno", "mirage", "nuke", "overpass", "train"],
   "gotv": {},
   "irc": {
     "nick": "OrangeBot",
     "server": "localhost",
-    "channels": [
-      "#orangechannel"
-    ],
+    "channels": ["#orangechannel"],
     "realname": "Agent Orange"
   },
   "telegram": {
