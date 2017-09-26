@@ -12,8 +12,9 @@ const nconf = require("nconf"),
 // Require bot modules
 const Server = require("./server.js"),
   Player = require("./player.js"),
-  rcons = require("./rcons.js"),
-  utils = require("./utils.js");
+  Rcons = require("./rcons.js"),
+  Utils = require("./utils.js");
+
 (function loadConfigs() {
   const confPath = "./config.json",
     defaults = require("./default-config.json");
@@ -70,7 +71,7 @@ function addServer(host, port, pass) {
 
 for (const i in admins) {
   if (admins.hasOwnProperty(i)) {
-    bot.admins64.push(utils.id64(admins[i]));
+    bot.admins64.push(Utils.id64(admins[i]));
   }
 }
 
@@ -105,7 +106,7 @@ udpServer.on("message", function(msg, info) {
   const addr = info.address + ":" + info.port,
     text = msg.toString();
 
-  console.log(utils.clean(text).substring(3));
+  console.log(Utils.clean(text).substring(3));
 
   let param, cmd, re, match;
 
@@ -126,7 +127,7 @@ udpServer.on("message", function(msg, info) {
       // Get player Steam ID
       const conName = match.capture("user_name"),
         conId = match.capture("steam_id"),
-        conId64 = utils.id64(conId);
+        conId64 = Utils.id64(conId);
 
       // Check if connecting user is a player
       request("https://akl.tite.fi/akl-service/api/users/communityid/" + conId64, function(error, response, body) {
@@ -137,7 +138,7 @@ udpServer.on("message", function(msg, info) {
 
         if (response.statusCode === 200) {
           bot.servers[addr].chat(" \x10" + conName + " (connecting) is a registered user.");
-        } else if (utils.whitelisted(conId)) {
+        } else if (Utils.whitelisted(conId)) {
           bot.servers[addr].chat(" \x10" + conName + " (connecting) is whitelisted.");
         } else {
           bot.servers[addr].chat(" \x10" + conName + " tried to connect, but is not registered.");
@@ -380,12 +381,12 @@ setInterval(function() {
 
       if (!bot.servers[i].state.live && bot.servers[i].state.pool.length === 0) {
         if (bot.servers[i].state.knife) {
-          bot.servers[i].rcon(rcons.WARMUP_KNIFE);
+          bot.servers[i].rcon(Rcons.WARMUP_KNIFE);
         } else {
-          bot.servers[i].rcon(rcons.WARMUP);
+          bot.servers[i].rcon(Rcons.WARMUP);
         }
       } else if (bot.servers[i].state.paused && bot.servers[i].state.freeze) {
-        bot.servers[i].rcon(rcons.MATCH_PAUSED);
+        bot.servers[i].rcon(Rcons.MATCH_PAUSED);
       }
     }
   }

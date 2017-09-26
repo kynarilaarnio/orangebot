@@ -1,8 +1,8 @@
 const named = require("named-regexp").named,
   rcon = require("simple-rcon");
 
-const rcons = require("./rcons.js"),
-  utils = require("./utils.js");
+const Rcons = require("./rcons.js"),
+  Utils = require("./utils.js");
 
 module.exports = class Server {
   constructor(cfg) {
@@ -52,7 +52,7 @@ module.exports = class Server {
 
   setup() {
     if (this.cfg.adminid !== undefined && this.state.steamid.indexOf(this.cfg.adminid) === -1) {
-      this.state.steamid.push(utils.id64(this.cfg.adminid));
+      this.state.steamid.push(Utils.id64(this.cfg.adminid));
       this.state.admins.push(this.cfg.adminname);
     }
 
@@ -111,13 +111,15 @@ module.exports = class Server {
 
   // Try solve team name
   clantag(team) {
+  	// Todo: set teams
+	// http://www.tobyscs.com/csgo-custom-team-logos-flags/
     if (team !== "TERRORIST" && team !== "CT") {
       return team;
     }
     const tags = {};
     let ret = "Team";
-    if (team === "TERRORIST") ret = rcons.T;
-    else if (team === "CT") ret = rcons.CT;
+    if (team === "TERRORIST") ret = Rcons.T;
+    else if (team === "CT") ret = Rcons.CT;
 
     for (const i in this.state.players) {
       if (
@@ -138,7 +140,7 @@ module.exports = class Server {
         max = tags[prop];
       }
     }
-    ret = utils.clean(ret);
+    ret = Utils.clean(ret);
     if (team === "CT" && this.clantag("TERRORIST") === ret) {
       ret = ret + "2";
     }
@@ -148,7 +150,7 @@ module.exports = class Server {
   // Call admin via Telegram
   admin(steamid) {
     return (
-      this.state.steamid.indexOf(utils.id64(steamid)) >= 0 || this.cfg.bot.admins64.indexOf(utils.id64(steamid)) >= 0
+      this.state.steamid.indexOf(Utils.id64(steamid)) >= 0 || this.cfg.bot.admins64.indexOf(Utils.id64(steamid)) >= 0
     );
   }
 
@@ -213,7 +215,7 @@ module.exports = class Server {
     }
     this.state.round = roundNum;
     if (roundNum < 10) roundNum = "0" + roundNum;
-    this.rcon(rcons.RESTORE_ROUND.format("backup_round" + roundNum + ".txt", round));
+    this.rcon(Rcons.RESTORE_ROUND.format("backup_round" + roundNum + ".txt", round));
     const that = this;
     setTimeout(function() {
       that.rcon("say \x054...");
@@ -228,7 +230,7 @@ module.exports = class Server {
       that.rcon("say \x0f1...");
     }, 4000);
     setTimeout(function() {
-      that.rcon(rcons.LIVE + ";mp_unpause_match");
+      that.rcon(Rcons.LIVE + ";mp_unpause_match");
     }, 5000);
   }
 
@@ -236,7 +238,7 @@ module.exports = class Server {
   round() {
     this.state.freeze = false;
     this.state.paused = false;
-    this.rcon(rcons.ROUND_STARTED);
+    this.rcon(Rcons.ROUND_STARTED);
     this.state.round++;
   }
 
@@ -281,14 +283,14 @@ module.exports = class Server {
         parse_mode: "Markdown"
       }
     );
-    this.rcon(rcons.PAUSE_ENABLED);
+    this.rcon(Rcons.PAUSE_ENABLED);
     this.state.paused = true;
     this.state.unpause = {
       TERRORIST: false,
       CT: false
     };
     if (this.state.freeze) {
-      this.rcon(rcons.MATCH_PAUSED);
+      this.rcon(Rcons.MATCH_PAUSED);
     }
   }
 
@@ -328,9 +330,9 @@ module.exports = class Server {
           for (const i in match.captures.steam_id) {
             if (
               match.captures.steam_id.hasOwnProperty(i) &&
-              that.state.steamid.indexOf(utils.id64(match.captures.steam_id[i])) === -1
+              that.state.steamid.indexOf(Utils.id64(match.captures.steam_id[i])) === -1
             ) {
-              that.state.steamid.push(utils.id64(match.captures.steam_id[i]));
+              that.state.steamid.push(Utils.id64(match.captures.steam_id[i]));
               that.state.admins.push(match.captures.user_name[i]);
             }
           }
@@ -354,8 +356,8 @@ module.exports = class Server {
       this.state.pool = this.cfg.nconf.get("pool").slice(0);
       this.state.banned = [];
       this.state.picked = [];
-      this.state.banner = utils.getRandom(["CT", "TERRORIST"]);
-      this.chat(rcons.VETO.format(this.clantag(this.state.banner), this.state.pool.join(", ")));
+      this.state.banner = Utils.getRandom(["CT", "TERRORIST"]);
+      this.chat(Rcons.VETO.format(this.clantag(this.state.banner), this.state.pool.join(", ")));
     }
   }
 
@@ -490,13 +492,13 @@ module.exports = class Server {
 
       if (this.state.unpause.TERRORIST !== this.state.unpause.CT) {
         this.rcon(
-          rcons.READY.format(
-            this.state.ready.TERRORIST ? rcons.T : rcons.CT,
-            this.state.ready.TERRORIST ? rcons.CT : rcons.T
+          Rcons.READY.format(
+            this.state.ready.TERRORIST ? Rcons.T : Rcons.CT,
+            this.state.ready.TERRORIST ? Rcons.CT : Rcons.T
           )
         );
       } else if (this.state.unpause.TERRORIST === true && this.state.unpause.CT === true) {
-        this.rcon(rcons.MATCH_UNPAUSE);
+        this.rcon(Rcons.MATCH_UNPAUSE);
         this.state.paused = false;
         this.state.unpause = {
           TERRORIST: false,
@@ -513,9 +515,9 @@ module.exports = class Server {
 
       if (this.state.ready.TERRORIST !== this.state.ready.CT) {
         this.rcon(
-          rcons.READY.format(
-            this.state.ready.TERRORIST ? rcons.T : rcons.CT,
-            this.state.ready.TERRORIST ? rcons.CT : rcons.T
+          Rcons.READY.format(
+            this.state.ready.TERRORIST ? Rcons.T : Rcons.CT,
+            this.state.ready.TERRORIST ? Rcons.CT : Rcons.T
           )
         );
       } else if (this.state.ready.TERRORIST === true && this.state.ready.CT === true) {
@@ -531,20 +533,20 @@ module.exports = class Server {
           "_" +
           this.state.map +
           "_" +
-          utils.cleandemo(this.clantag("TERRORIST")) +
+          Utils.cleandemo(this.clantag("TERRORIST")) +
           "-" +
-          utils.cleandemo(this.clantag("CT")) +
+          Utils.cleandemo(this.clantag("CT")) +
           ".dem";
         const that = this;
         if (this.state.knife) {
-          this.rcon(rcons.KNIFE_STARTING.format(demo));
+          this.rcon(Rcons.KNIFE_STARTING.format(demo));
           setTimeout(function() {
-            that.rcon(rcons.KNIFE_STARTED);
+            that.rcon(Rcons.KNIFE_STARTED);
           }, 9000);
         } else {
-          this.rcon(rcons.MATCH_STARTING.format(demo));
+          this.rcon(Rcons.MATCH_STARTING.format(demo));
           setTimeout(function() {
-            that.rcon(rcons.MATCH_STARTED);
+            that.rcon(Rcons.MATCH_STARTED);
           }, 9000);
         }
         const message =
@@ -589,7 +591,7 @@ module.exports = class Server {
           that.chat(" \x0f1...");
         }, 4000);
         setTimeout(function() {
-          that.rcon(rcons.LIVE);
+          that.rcon(Rcons.LIVE);
           that.rcon('script ScriptPrintMessageCenterAll("Match is LIVE! GL HF!")');
         }, 5000);
       }
@@ -627,10 +629,10 @@ module.exports = class Server {
     if (this.state.live) return;
     if (!this.state.knife) {
       this.state.knife = true;
-      this.rcon(rcons.WARMUP_KNIFE);
+      this.rcon(Rcons.WARMUP_KNIFE);
     } else {
       this.state.knife = false;
-      this.rcon(rcons.KNIFE_DISABLED);
+      this.rcon(Rcons.KNIFE_DISABLED);
     }
   }
 
@@ -645,9 +647,9 @@ module.exports = class Server {
     if (score.TERRORIST + score.CT === 1 && this.state.knife) {
       this.state.knifewinner = score.TERRORIST === 1 ? "TERRORIST" : "CT";
       this.state.knife = false;
-      this.rcon(rcons.KNIFE_WON.format(this.state.knifewinner === "TERRORIST" ? rcons.T : rcons.CT));
+      this.rcon(Rcons.KNIFE_WON.format(this.state.knifewinner === "TERRORIST" ? Rcons.T : Rcons.CT));
     } else if (this.state.paused) {
-      this.rcon(rcons.MATCH_PAUSED);
+      this.rcon(Rcons.MATCH_PAUSED);
     }
     this.state.freeze = true;
   }
@@ -656,7 +658,7 @@ module.exports = class Server {
   stay(team) {
     if (team === this.state.knifewinner) {
       this.state.round = 0;
-      this.rcon(rcons.KNIFE_STAY);
+      this.rcon(Rcons.KNIFE_STAY);
       this.state.knifewinner = false;
     }
   }
@@ -665,7 +667,7 @@ module.exports = class Server {
   swap(team) {
     if (team === this.state.knifewinner) {
       this.state.round = 0;
-      this.rcon(rcons.KNIFE_SWAP);
+      this.rcon(Rcons.KNIFE_SWAP);
       this.state.knifewinner = false;
     }
   }
@@ -706,15 +708,15 @@ module.exports = class Server {
   }
 
   say(msg) {
-    this.rcon("say " + utils.cleansay(msg));
+    this.rcon("say " + Utils.cleansay(msg));
   }
 
   chat(msg) {
-    this.rcon('script ScriptPrintMessageChatAll("' + utils.cleansay(msg) + '")');
+    this.rcon('script ScriptPrintMessageChatAll("' + Utils.cleansay(msg) + '")');
   }
 
   center(msg) {
-    this.rcon('script ScriptPrintMessageCenterAll("' + utils.cleansay(msg) + '")');
+    this.rcon('script ScriptPrintMessageCenterAll("' + Utils.cleansay(msg) + '")');
   }
 
   warmup() {
@@ -734,6 +736,6 @@ module.exports = class Server {
     this.state.pool = [];
     this.state.banner = "";
     this.state.round = 0;
-    this.rcon(rcons.CONFIG);
+    this.rcon(Rcons.CONFIG);
   }
 };
