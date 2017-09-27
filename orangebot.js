@@ -106,7 +106,7 @@ udpServer.on("message", function(msg, info) {
   const addr = info.address + ":" + info.port,
     text = msg.toString();
 
-  console.log("<" + addr + ">" + Utils.clean(text).substring(3));
+  console.log("<" + addr + "> " + Utils.clean(text).substring(3));
 
   let param, cmd, re, match;
 
@@ -381,7 +381,9 @@ setInterval(function() {
 
       if (!bot.servers[i].state.live && bot.servers[i].state.pool.length === 0) {
         if (bot.servers[i].state.knife) {
-          bot.servers[i].rcon(Rcons.WARMUP_KNIFE);
+          // Hotfix: show correct help
+          //bot.servers[i].rcon(Rcons.WARMUP_KNIFE);
+          bot.servers[i].rcon(Rcons.WARMUP);
         } else {
           bot.servers[i].rcon(Rcons.WARMUP);
         }
