@@ -77,10 +77,14 @@ for (const i in admins) {
 
 if (bot.hasOwnProperty("telegramBot")) {
   bot.telegramBot.on("message", function(msg) {
-    if (!msg.text) return;
+    if (!msg.text) {
+      return;
+    }
 
     // Only listen set group chat
-    if (msg.chat.id !== telegram.groupId) return;
+    if (String(msg.chat.id) !== telegram.groupId) {
+      return;
+    }
 
     //const name = msg.from.username || msg.from.first_name;
     const message = msg.text;
