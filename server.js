@@ -79,6 +79,10 @@ module.exports = class Server {
     console.log("Connected to " + this.cfg.ip + ":" + this.cfg.port + ", pass " + this.cfg.pass);
   }
 
+  get() {
+    return this.state;
+  };
+
   // Queue RCON command
   rcon(cmd) {
     if (cmd === undefined) return;
@@ -111,8 +115,6 @@ module.exports = class Server {
 
   // Try solve team name
   clantag(team) {
-  	// Todo: set teams
-	// http://www.tobyscs.com/csgo-custom-team-logos-flags/
     if (team !== "TERRORIST" && team !== "CT") {
       return team;
     }
@@ -154,7 +156,7 @@ module.exports = class Server {
     );
   }
 
-  // ???
+  // Calculate stats
   stats(tochat) {
     const team1 = this.clantag("TERRORIST");
     const team2 = this.clantag("CT");
@@ -701,9 +703,10 @@ module.exports = class Server {
         ", CT:" +
         this.state.unpause.CT +
         ", pool: " +
-        this.state.pool.join(",")
+        this.state.pool.join(",") +
+        ", format: " +
+        this.state.format
     );
-    this.rcon("say format: " + this.state.format);
     this.stats(true);
   }
 
