@@ -208,8 +208,10 @@ module.exports = class Server {
 
   // Restore round
   restore(round) {
-    if (round !== "undefined") {
-      let roundNum = parseInt(round);
+    let roundNum = parseInt(round);
+    if (isNaN(roundNum)) {
+      this.rcon('Cannot parse round number!');
+      return;
     }
     if (roundNum >= this.state.round || !this.state.live) {
       this.rcon("say That round has not been played yet!");
