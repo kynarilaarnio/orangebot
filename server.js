@@ -562,7 +562,7 @@ module.exports = class Server {
             .replace(/de_/g, "") +
           "\n*Match started*";
         this.cfg.bot.telegramBot.sendMessage(
-          this.cfg.nconf.get("telegram:groupid"),
+          this.cfg.nconf.get("telegram:groupId"),
           "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message,
           {
             parse_mode: "Markdown"
