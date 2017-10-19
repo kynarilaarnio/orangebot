@@ -508,6 +508,21 @@ module.exports = class Server {
           TERRORIST: false,
           CT: false
         };
+        const message =
+          this.stats(false) +
+          "\n" +
+          this.state.maps
+            .join(" ")
+            .replace(this.state.map, "*" + this.state.map + "*")
+            .replace(/de_/g, "") +
+          "\n*Match resumed*";
+        this.cfg.bot.telegramBot.sendMessage(
+          this.cfg.nconf.get("telegram:groupId"),
+          "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message,
+          {
+            parse_mode: "Markdown"
+          }
+        );
       }
     } else if (!this.state.live) {
       if (team === true) {
