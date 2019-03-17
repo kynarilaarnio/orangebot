@@ -222,7 +222,8 @@ udpServer.on("message", function(msg, info) {
         delete bot.servers[addr].state.players[prop];
       }
     }
-    if (bot.servers[addr].state.round > 14) {
+    const rounds = bot.servers[addr].state.mode === 'wingman' ? 7 : 14
+    if (bot.servers[addr].state.round > rounds) {
       bot.servers[addr].win();
     }
     bot.servers[addr].lastlog = new Date().getTime();
@@ -361,6 +362,9 @@ udpServer.on("message", function(msg, info) {
         break;
       case "bo3":
         if (isAdmin) bot.servers[addr].matchformat("bo3");
+        break;
+      case "mode":
+        if (isAdmin) bot.servers[addr].changeMode(param[0]);
         break;
       case "matchformat":
         if (isAdmin) bot.servers[addr].matchformat(param[0]);

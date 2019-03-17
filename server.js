@@ -44,7 +44,8 @@ module.exports = class Server {
       banned: [],
       picked: [],
       stats: "",
-      format: "bo1"
+      format: "bo1",
+      mode: '5on5'
     };
 
     this.setup();
@@ -739,6 +740,10 @@ module.exports = class Server {
     this.rcon('script ScriptPrintMessageCenterAll("' + Utils.cleansay(msg) + '")');
   }
 
+  changeMode(mode) {
+    this.state.mode = mode;
+  }
+
   warmup() {
     this.state.ready = {
       TERRORIST: false,
@@ -756,6 +761,10 @@ module.exports = class Server {
     this.state.pool = [];
     this.state.banner = "";
     this.state.round = 0;
-    this.rcon(Rcons.CONFIG);
+    if (this.state.mode === 'wingman') {
+      this.rcon(Rcons.WINGMANCONFIG);
+    } else {
+      this.rcon(Rcons.CONFIG);
+    }
   }
 };
