@@ -44,8 +44,8 @@ module.exports = class Server {
       banned: [],
       picked: [],
       stats: "",
-      format: "bo1",
-      mode: '5on5'
+      format: "bo3",
+      mode: 'wingman'
     };
 
     this.setup();

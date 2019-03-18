@@ -134,6 +134,7 @@ udpServer.on("message", function(msg, info) {
         conId64 = Utils.id64(conId);
 
       // Check if connecting user is a player
+      /*
       request("https://akl.tite.fi/akl-service/api/users/communityid/" + conId64, function(error, response, body) {
         if (error) {
           bot.servers[addr].chat(" \x10Letting " + conName + " connect because AKL API is not responding.");
@@ -153,6 +154,7 @@ udpServer.on("message", function(msg, info) {
           bot.admins64.push(conId64);
         }
       });
+      */
     }
   }
 
@@ -222,7 +224,7 @@ udpServer.on("message", function(msg, info) {
         delete bot.servers[addr].state.players[prop];
       }
     }
-    const rounds = bot.servers[addr].state.mode === 'wingman' ? 7 : 14
+    const rounds = bot.servers[addr].state.mode === 'wingman' ? 7 : 14;
     if (bot.servers[addr].state.round > rounds) {
       bot.servers[addr].win();
     }
@@ -259,6 +261,13 @@ udpServer.on("message", function(msg, info) {
     bot.servers[addr].lastlog = new Date().getTime();
   }
 
+  /* Match end 
+  re = named(/Game Over: scrimcomp2v2 mg_active/);
+  match = re.exec(text);
+  if (match !== null) {
+    bot.servers[addr].win();
+  }
+  */
   // !command
   re = named(
     /"(:<user_name>.+)[<](:<user_id>\d+)[>][<](:<steam_id>.*)[>][<](:<user_team>CT|TERRORIST|Unassigned|Spectator|Console)[>]" say(:<say_team>_team)? "[!\.](:<text>.*)"/
