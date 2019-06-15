@@ -134,7 +134,7 @@ udpServer.on("message", function(msg, info) {
         conId64 = Utils.id64(conId);
 
       // Check if connecting user is a player
-      request("https://akl.tite.fi/akl-service/api/users/communityid/" + conId64, function(error, response, body) {
+      request("https://akl.gg/akl-service/api/users/communityid/" + conId64, function(error, response, body) {
         if (error) {
           bot.servers[addr].chat(" \x10Letting " + conName + " connect because AKL API is not responding.");
           return;
