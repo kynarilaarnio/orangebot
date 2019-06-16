@@ -11,7 +11,6 @@ const nconf = require("nconf"),
 
 // Require bot modules
 const Server = require("./server.js"),
-  Player = require("./player.js"),
   Rcons = require("./rcons.js"),
   Utils = require("./utils.js");
 
@@ -111,9 +110,8 @@ if (bot.hasOwnProperty("telegramBot")) {
 udpServer.on("message", function(msg, info) {
   const addr = info.address + ":" + info.port,
     text = msg.toString();
-    // console.log('Message: ', text);
 
-  //console.log("<" + addr + "> " + Utils.clean(text).substring(3));
+  // console.log("<" + addr + "> " + Utils.clean(text).substring(3));
 
   let param, cmd, re, match;
 
@@ -149,7 +147,7 @@ udpServer.on("message", function(msg, info) {
           bot.servers[addr].chat(" \x10" + conName + " (connecting) is whitelisted.");
         } else {
           bot.servers[addr].chat(" \x10" + conName + " tried to connect, but is not registered.");
-          bot.servers[addr].rcon("kickid " + conId + " This account is not registered on akl.tite.fi");
+          bot.servers[addr].rcon("kickid " + conId + " This account is not registered on akl.gg");
         }
 
         if (body.match(/(ROLE_ADMIN|ROLE_REFEREE)/gm) && bot.admins64.indexOf(conId64) < 0) {
@@ -167,11 +165,11 @@ udpServer.on("message", function(msg, info) {
   if (match !== null) {
     if (bot.servers[addr].state.players[match.capture("steam_id")] === undefined) {
       if (match.capture("steam_id") !== "BOT") {
-        const player = new Player();
+        const player = {};
         player.steamid = match.capture("steam_id");
         player.name = match.capture("user_name");
         player.team = match.capture("new_team");
-        bot.servers[addr].state.players[match.capture("steam_id")].push(player);
+        bot.servers[addr].state.players[match.capture("steam_id")] = player;
       }
     } else {
       bot.servers[addr].state.players[match.capture("steam_id")].steamid = match.capture("steam_id");
@@ -185,16 +183,11 @@ udpServer.on("message", function(msg, info) {
   re = named(/Team playing "(:<team>CT|TERRORIST)": (:<clan_tag>.+)/)
   match = re.exec(text);
   if (match !== null) {
-    for (let player in bot.servers[addr].state.players){
-      console.log('Player: ', player);
-      console.log('Player team', player.team);
-      console.log('Match: ', match);
-      if (bot.servers[addr].state.players.hasOwnProperty(player)){
-        if (player.team === match.capture("team")){
-          player.clantag = match.capture("clan_tag");
-        }
+    Object.keys(bot.servers[addr].state.players).forEach((key) => {
+      if (bot.servers[addr].state.players[key].team === match.capture("team")){
+        bot.servers[addr].state.players[key].clantag = match.capture("clan_tag");
       }
-    }
+    });
     bot.servers[addr].lastlog = new Date().getTime();
   }
   
