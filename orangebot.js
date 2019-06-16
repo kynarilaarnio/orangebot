@@ -191,8 +191,9 @@ udpServer.on("message", function(msg, info) {
         }
       }
     }
+    bot.servers[addr].lastlog = new Date().getTime();
   }
-  bot.servers[addr].lastlog = new Date().getTime();
+  
 
   // Disconnect
   re = named(
