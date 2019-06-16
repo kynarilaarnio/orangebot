@@ -111,6 +111,7 @@ if (bot.hasOwnProperty("telegramBot")) {
 udpServer.on("message", function(msg, info) {
   const addr = info.address + ":" + info.port,
     text = msg.toString();
+    // console.log('Message: ', text);
 
   //console.log("<" + addr + "> " + Utils.clean(text).substring(3));
 
@@ -166,12 +167,11 @@ udpServer.on("message", function(msg, info) {
   if (match !== null) {
     if (bot.servers[addr].state.players[match.capture("steam_id")] === undefined) {
       if (match.capture("steam_id") !== "BOT") {
-        bot.servers[addr].state.players[match.capture("steam_id")] = new Player(
-          match.capture("steam_id"),
-          match.capture("new_team"),
-          match.capture("user_name"),
-          undefined
-        );
+        const player = new Player();
+        player.steamid = match.capture("steam_id");
+        player.name = match.capture("user_name");
+        player.team = match.capture("new_team");
+        bot.servers[addr].state.players[match.capture("steam_id")].push(player);
       }
     } else {
       bot.servers[addr].state.players[match.capture("steam_id")].steamid = match.capture("steam_id");
@@ -183,8 +183,12 @@ udpServer.on("message", function(msg, info) {
 
   // Clantag
   re = named(/Team playing "(:<team>CT|TERRORIST)": (:<clan_tag>.+)/)
+  match = re.exec(text);
   if (match !== null) {
     for (let player in bot.servers[addr].state.players){
+      console.log('Player: ', player);
+      console.log('Player team', player.team);
+      console.log('Match: ', match);
       if (bot.servers[addr].state.players.hasOwnProperty(player)){
         if (player.team === match.capture("team")){
           player.clantag = match.capture("clan_tag");
