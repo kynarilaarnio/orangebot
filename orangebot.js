@@ -44,6 +44,8 @@ const bot = {
   servers: {}
 };
 
+
+
 if (nconf.get("irc")) {
   bot.ircClient = new irc.Client(nconf.get("irc:server"), nconf.get("irc:nick"), {
     channels: nconf.get("irc:channels"),
@@ -200,6 +202,19 @@ udpServer.on("message", function(msg, info) {
     }
     bot.servers[addr].lastlog = new Date().getTime();
   }
+
+  // Clantag
+  re = named(/Team playing "(:<team>CT|TERRORIST)": (:<clan_tag>.+)/)
+  if (match !== null) {
+    for (let player in bot.servers[addr].state.players){
+      if (bot.servers[addr].state.players.hasOwnProperty(player)){
+        if (player.team === match.capture("team")){
+          player.clantag = match.capture("clan_tag");
+        }
+      }
+    }
+  }
+  bot.servers[addr].lastlog = new Date().getTime();
 
   // Disconnect
   re = named(
