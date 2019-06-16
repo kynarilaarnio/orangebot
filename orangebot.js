@@ -182,28 +182,6 @@ udpServer.on("message", function(msg, info) {
   }
 
   // Clantag
-  re = named(
-    /"(:<user_name>.+)[<](:<user_id>\d+)[>][<](:<steam_id>.*?)[>][<](:<user_team>CT|TERRORIST|Unassigned|Spectator)[>]" triggered "clantag" \(value "(:<clan_tag>.*)"\)/
-  );
-  match = re.exec(text);
-  if (match !== null) {
-    if (bot.servers[addr].state.players[match.capture("steam_id")] === undefined) {
-      if (match.capture("steam_id") !== "BOT") {
-        bot.servers[addr].state.players[match.capture("steam_id")] = new Player(
-          match.capture("steam_id"),
-          match.capture("user_team"),
-          match.capture("user_name"),
-          match.capture("clan_tag")
-        );
-      }
-    } else {
-      bot.servers[addr].state.players[match.capture("steam_id")].clantag =
-        match.capture("clan_tag") !== "" ? match.capture("clan_tag") : undefined;
-    }
-    bot.servers[addr].lastlog = new Date().getTime();
-  }
-
-  // Clantag
   re = named(/Team playing "(:<team>CT|TERRORIST)": (:<clan_tag>.+)/)
   if (match !== null) {
     for (let player in bot.servers[addr].state.players){
