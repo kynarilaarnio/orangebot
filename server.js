@@ -38,7 +38,7 @@ module.exports = class Server {
       steamid: [],
       admins: [],
       queue: [],
-      players: {},
+      players:{},
       banner: "",
       pool: [],
       banned: [],
@@ -135,6 +135,7 @@ module.exports = class Server {
         tags[this.state.players[i].clantag]++;
       }
     }
+
     let max = 0;
     for (const prop in tags) {
       if (tags.hasOwnProperty(prop) && tags[prop] > max) {

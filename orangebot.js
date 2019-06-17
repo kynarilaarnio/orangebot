@@ -11,7 +11,6 @@ const nconf = require("nconf"),
 
 // Require bot modules
 const Server = require("./server.js"),
-  Player = require("./player.js"),
   Rcons = require("./rcons.js"),
   Utils = require("./utils.js");
 
@@ -43,6 +42,8 @@ const bot = {
   admins64: [],
   servers: {}
 };
+
+
 
 if (nconf.get("irc")) {
   bot.ircClient = new irc.Client(nconf.get("irc:server"), nconf.get("irc:nick"), {
@@ -110,7 +111,7 @@ udpServer.on("message", function(msg, info) {
   const addr = info.address + ":" + info.port,
     text = msg.toString();
 
-  //console.log("<" + addr + "> " + Utils.clean(text).substring(3));
+  // console.log("<" + addr + "> " + Utils.clean(text).substring(3));
 
   let param, cmd, re, match;
 
@@ -134,7 +135,7 @@ udpServer.on("message", function(msg, info) {
         conId64 = Utils.id64(conId);
 
       // Check if connecting user is a player
-      request("https://akl.tite.fi/akl-service/api/users/communityid/" + conId64, function(error, response, body) {
+      request("https://akl.gg/akl-service/api/users/communityid/" + conId64, function(error, response, body) {
         if (error) {
           bot.servers[addr].chat(" \x10Letting " + conName + " connect because AKL API is not responding.");
           return;
@@ -146,7 +147,7 @@ udpServer.on("message", function(msg, info) {
           bot.servers[addr].chat(" \x10" + conName + " (connecting) is whitelisted.");
         } else {
           bot.servers[addr].chat(" \x10" + conName + " tried to connect, but is not registered.");
-          bot.servers[addr].rcon("kickid " + conId + " This account is not registered on akl.tite.fi");
+          bot.servers[addr].rcon("kickid " + conId + " This account is not registered on akl.gg");
         }
 
         if (body.match(/(ROLE_ADMIN|ROLE_REFEREE)/gm) && bot.admins64.indexOf(conId64) < 0) {
@@ -164,12 +165,11 @@ udpServer.on("message", function(msg, info) {
   if (match !== null) {
     if (bot.servers[addr].state.players[match.capture("steam_id")] === undefined) {
       if (match.capture("steam_id") !== "BOT") {
-        bot.servers[addr].state.players[match.capture("steam_id")] = new Player(
-          match.capture("steam_id"),
-          match.capture("new_team"),
-          match.capture("user_name"),
-          undefined
-        );
+        const player = {};
+        player.steamid = match.capture("steam_id");
+        player.name = match.capture("user_name");
+        player.team = match.capture("new_team");
+        bot.servers[addr].state.players[match.capture("steam_id")] = player;
       }
     } else {
       bot.servers[addr].state.players[match.capture("steam_id")].steamid = match.capture("steam_id");
@@ -180,26 +180,17 @@ udpServer.on("message", function(msg, info) {
   }
 
   // Clantag
-  re = named(
-    /"(:<user_name>.+)[<](:<user_id>\d+)[>][<](:<steam_id>.*?)[>][<](:<user_team>CT|TERRORIST|Unassigned|Spectator)[>]" triggered "clantag" \(value "(:<clan_tag>.*)"\)/
-  );
+  re = named(/Team playing "(:<team>CT|TERRORIST)": (:<clan_tag>.+)/)
   match = re.exec(text);
   if (match !== null) {
-    if (bot.servers[addr].state.players[match.capture("steam_id")] === undefined) {
-      if (match.capture("steam_id") !== "BOT") {
-        bot.servers[addr].state.players[match.capture("steam_id")] = new Player(
-          match.capture("steam_id"),
-          match.capture("user_team"),
-          match.capture("user_name"),
-          match.capture("clan_tag")
-        );
+    Object.keys(bot.servers[addr].state.players).forEach((key) => {
+      if (bot.servers[addr].state.players[key].team === match.capture("team")){
+        bot.servers[addr].state.players[key].clantag = match.capture("clan_tag");
       }
-    } else {
-      bot.servers[addr].state.players[match.capture("steam_id")].clantag =
-        match.capture("clan_tag") !== "" ? match.capture("clan_tag") : undefined;
-    }
+    });
     bot.servers[addr].lastlog = new Date().getTime();
   }
+  
 
   // Disconnect
   re = named(
