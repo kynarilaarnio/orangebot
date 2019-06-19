@@ -44,7 +44,7 @@ function getRandom(arr) {
   return newArr[0];
 }
 
-function whitelisted(steamid) {
+function whitelisted(steamid, whitelist) {
   for (const i in whitelist) {
     if (whitelist.hasOwnProperty(i) && id64(whitelist[i]) === id64(steamid)) {
       return true;

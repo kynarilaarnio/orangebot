@@ -143,7 +143,7 @@ udpServer.on("message", function(msg, info) {
 
         if (response.statusCode === 200) {
           bot.servers[addr].chat(" \x10" + conName + " (connecting) is a registered user.");
-        } else if (Utils.whitelisted(conId)) {
+        } else if (Utils.whitelisted(conId, whitelist)) {
           bot.servers[addr].chat(" \x10" + conName + " (connecting) is whitelisted.");
         } else {
           bot.servers[addr].chat(" \x10" + conName + " tried to connect, but is not registered.");
