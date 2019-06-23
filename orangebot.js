@@ -356,6 +356,9 @@ udpServer.on("message", function(msg, info) {
       case "matchformat":
         if (isAdmin) bot.servers[addr].matchformat(param[0]);
         break;
+      case "team":
+         bot.servers[addr].setClanName(param, match.capture("user_team"));
+        break;
       default:
         break;
     }

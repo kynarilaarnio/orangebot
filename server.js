@@ -366,6 +366,15 @@ module.exports = class Server {
     }
   }
 
+  // Set clantag
+  setClanName(clanName, team) {
+    if (team === 'TERRORIST') {
+      this.rcon(`mp_teamname_2 ${clanName}`);
+    } else if (team === 'CT') {
+      this.rcon(`mp_teamname_1 ${clanName}`);
+    }
+  }
+
   // Pick map
   pick(map, team) {
     if (this.state.banner !== team) {
