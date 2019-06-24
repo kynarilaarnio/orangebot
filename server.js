@@ -44,7 +44,9 @@ module.exports = class Server {
       banned: [],
       picked: [],
       stats: "",
-      format: "bo1"
+      format: "bo1",
+      ct_clan: "",
+      t_clan: "",
     };
 
     this.setup();
