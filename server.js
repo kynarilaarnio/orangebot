@@ -46,8 +46,8 @@ module.exports = class Server {
       stats: "",
       format: "bo1",
       setClan: {
-        TERRORIST: false,
-        CT: false,
+        TERRORIST: 'TERRORIST',
+        CT: 'CT',
       }
     };
 
@@ -119,39 +119,11 @@ module.exports = class Server {
 
   // Try solve team name
   clantag(team) {
-    if (team !== "TERRORIST" && team !== "CT") {
-      return team;
+    if (team === 'TERRORIST') {
+      return this.state.setClan.TERRORIST
+    } else if (team === 'CT') {
+      return this.state.setClan.CT
     }
-    const tags = {};
-    let ret = "Team";
-    if (team === "TERRORIST") ret = Rcons.T;
-    else if (team === "CT") ret = Rcons.CT;
-
-    for (const i in this.state.players) {
-      if (
-        this.state.players.hasOwnProperty(i) &&
-        this.state.players[i].team === team &&
-        this.state.players[i].clantag !== undefined
-      ) {
-        if (tags[this.state.players[i].clantag] === undefined) {
-          tags[this.state.players[i].clantag] = 0;
-        }
-        tags[this.state.players[i].clantag]++;
-      }
-    }
-
-    let max = 0;
-    for (const prop in tags) {
-      if (tags.hasOwnProperty(prop) && tags[prop] > max) {
-        ret = prop;
-        max = tags[prop];
-      }
-    }
-    ret = Utils.clean(ret);
-    if (team === "CT" && this.clantag("TERRORIST") === ret) {
-      ret = ret + "2";
-    }
-    return ret;
   }
 
   // Call admin via Telegram
@@ -374,20 +346,10 @@ module.exports = class Server {
   setClanName(clanName, team) {
     if (team === 'TERRORIST') {
       this.rcon(`mp_teamname_2 ${clanName}`);
-      this.state.setClan.TERRORIST = true;
-      Object.keys(this.state.players).forEach((key) => {
-        if (this.state.players[key].team === 'TERRORIST'){
-          this.state.players[key].clantag = clanName;
-        }
-      });
+      this.state.setClan.TERRORIST = clanName;
     } else if (team === 'CT') {
       this.rcon(`mp_teamname_1 ${clanName}`);
-      this.state.setClan.CT = true;
-      Object.keys(this.state.players).forEach((key) => {
-        if (this.state.players[key].team === 'CT'){
-          this.state.players[key].clantag = clanName;
-        }
-      });
+      this.state.setClan.CT = clanName;
     }
   }
 
@@ -551,9 +513,10 @@ module.exports = class Server {
         );
       }
     } else if (!this.state.live) {
-      if (!this.state.setClan.CT || !this.state.setClan.TERRORIST) {
-        this.rcon('say \x10You must use !team to set set your clantag! For example !team AKL');
-      } else {
+      // if (this.state.setClan.CT === 'CT' || this.state.setClan.TERRORIST === 'TERRORIST') {
+      //   this.rcon('say \x10You must use !team to set set your clantag! For example !team AKL');
+      // } else {
+
         if (team === true) {
           this.state.ready.TERRORIST = true;
           this.state.ready.CT = true;
@@ -643,7 +606,7 @@ module.exports = class Server {
             that.rcon('script ScriptPrintMessageCenterAll("Match is LIVE! GL HF!")');
           }, 5000);
       }
-      }
+      // }
     }
   }
 
@@ -786,8 +749,10 @@ module.exports = class Server {
     this.state.pool = [];
     this.state.banner = "";
     this.state.round = 0;
-    this.state.setClan.CT = false;
-    this.state.setClan.TERRORIST = false;
+    this.state.setClan = {
+      TERRORIST: 'TERRORIST',
+      CT: 'CT',
+    };
     this.rcon(Rcons.CONFIG);
   }
 };
