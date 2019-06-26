@@ -183,15 +183,10 @@ udpServer.on("message", function(msg, info) {
   re = named(/Team playing "(:<team>CT|TERRORIST)": (:<clan_tag>.+)/)
   match = re.exec(text);
   if (match !== null) {
-    Object.keys(bot.servers[addr].state.players).forEach((key) => {
-      if (bot.servers[addr].state.players[key].team === match.capture("team")){
-        bot.servers[addr].state.players[key].clantag = match.capture("clan_tag");
-      }
-    });
     if (match.capture("team") === 'TERRORIST') {
-      bot.servers[addr].state.setClan.TERRORIST = true;
+      bot.servers[addr].state.setClan.TERRORIST = match.capture("clan_tag");
     } else if (match.capture("team") === 'CT') {
-      bot.servers[addr].state.setClan.CT = true;
+      bot.servers[addr].state.setClan.CT = match.capture("clan_tag");
     }
     bot.servers[addr].lastlog = new Date().getTime();
   }
