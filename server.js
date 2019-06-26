@@ -374,10 +374,20 @@ module.exports = class Server {
   setClanName(clanName, team) {
     if (team === 'TERRORIST') {
       this.rcon(`mp_teamname_2 ${clanName}`);
-      // this.state.setClan.TERRORIST = true;
+      this.state.setClan.TERRORIST = true;
+      Object.keys(this.state.players).forEach((key) => {
+        if (this.state.players[key].team === 'TERRORIST'){
+          this.state.players[key].clantag = clanName;
+        }
+      });
     } else if (team === 'CT') {
       this.rcon(`mp_teamname_1 ${clanName}`);
-      // this.state.setClan.CT = true;
+      this.state.setClan.CT = true;
+      Object.keys(this.state.players).forEach((key) => {
+        if (this.state.players[key].team === 'CT'){
+          this.state.players[key].clantag = clanName;
+        }
+      });
     }
   }
 
@@ -542,13 +552,13 @@ module.exports = class Server {
       }
     } else if (!this.state.live) {
       if (!this.state.setClan.CT || !this.state.setClan.TERRORIST) {
-        this.chat('You must use !team to set your team name tag before starting!')
+        this.rcon('say \x10You must use !team to set set your clantag! For example !team AKL');
       } else {
         if (team === true) {
           this.state.ready.TERRORIST = true;
           this.state.ready.CT = true;
         } else {
-          this.state.ready[team] = true;
+            this.state.ready[team] = true;
         }
   
         if (this.state.ready.TERRORIST !== this.state.ready.CT) {
@@ -632,7 +642,7 @@ module.exports = class Server {
             that.rcon(Rcons.LIVE);
             that.rcon('script ScriptPrintMessageCenterAll("Match is LIVE! GL HF!")');
           }, 5000);
-        }
+      }
       }
     }
   }
@@ -776,6 +786,8 @@ module.exports = class Server {
     this.state.pool = [];
     this.state.banner = "";
     this.state.round = 0;
+    this.state.setClan.CT = false;
+    this.state.setClan.TERRORIST = false;
     this.rcon(Rcons.CONFIG);
   }
 };

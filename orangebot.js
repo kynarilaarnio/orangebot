@@ -111,7 +111,7 @@ udpServer.on("message", function(msg, info) {
   const addr = info.address + ":" + info.port,
     text = msg.toString();
 
-  // console.log("<" + addr + "> " + Utils.clean(text).substring(3));
+  console.log("<" + addr + "> " + Utils.clean(text).substring(3));
 
   let param, cmd, re, match;
 
@@ -190,8 +190,8 @@ udpServer.on("message", function(msg, info) {
     });
     if (match.capture("team") === 'TERRORIST') {
       bot.servers[addr].state.setClan.TERRORIST = true;
-    } else if (match.capture("team") === "CT") {
-      bot.servers[addr].state.setClan.TERRORIST = true;
+    } else if (match.capture("team") === 'CT') {
+      bot.servers[addr].state.setClan.CT = true;
     }
     bot.servers[addr].lastlog = new Date().getTime();
   }
