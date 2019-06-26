@@ -188,6 +188,11 @@ udpServer.on("message", function(msg, info) {
         bot.servers[addr].state.players[key].clantag = match.capture("clan_tag");
       }
     });
+    if (match.capture("team") === 'TERRORIST') {
+      bot.servers[addr].state.setClan.TERRORIST = true;
+    } else if (match.capture("team") === "CT") {
+      bot.servers[addr].state.setClan.TERRORIST = true;
+    }
     bot.servers[addr].lastlog = new Date().getTime();
   }
   
