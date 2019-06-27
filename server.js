@@ -500,20 +500,80 @@ module.exports = class Server {
         this.state.unpause[team] = true;
       }
 
-      if (this.state.unpause.TERRORIST !== this.state.unpause.CT) {
+    if (this.state.unpause.TERRORIST !== this.state.unpause.CT) {
+      this.rcon(
+        Rcons.READY.format(
+          this.state.ready.TERRORIST ? Rcons.T : Rcons.CT,
+          this.state.ready.TERRORIST ? Rcons.CT : Rcons.T
+        )
+      );
+    } else if (this.state.unpause.TERRORIST === true && this.state.unpause.CT === true) {
+      this.rcon(Rcons.MATCH_UNPAUSE);
+      this.state.paused = false;
+      this.state.unpause = {
+        TERRORIST: false,
+        CT: false
+      };
+      const message =
+        this.stats(false) +
+        "\n" +
+        this.state.maps
+          .join(" ")
+          .replace(this.state.map, "*" + this.state.map + "*")
+          .replace(/de_/g, "") +
+        "\n*Match resumed*";
+      this.cfg.bot.telegramBot.sendMessage(
+        this.cfg.nconf.get("telegram:groupId"),
+        "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message,
+        {
+          parse_mode: "Markdown"
+        }
+      );
+    }
+  } else if (!this.state.live) {
+      if (team === true) {
+        this.state.ready.TERRORIST = true;
+        this.state.ready.CT = true;
+      } else {
+          this.state.ready[team] = true;
+      }
+
+      if (this.state.ready.TERRORIST !== this.state.ready.CT) {
         this.rcon(
           Rcons.READY.format(
             this.state.ready.TERRORIST ? Rcons.T : Rcons.CT,
             this.state.ready.TERRORIST ? Rcons.CT : Rcons.T
           )
         );
-      } else if (this.state.unpause.TERRORIST === true && this.state.unpause.CT === true) {
-        this.rcon(Rcons.MATCH_UNPAUSE);
-        this.state.paused = false;
-        this.state.unpause = {
-          TERRORIST: false,
-          CT: false
-        };
+      } else if (this.state.ready.TERRORIST === true && this.state.ready.CT === true) {
+        this.state.live = true;
+        this.state.round = 0;
+        const demo =
+          "matches/" +
+          new Date()
+            .toISOString()
+            .replace(/T/, "_")
+            .replace(/:/g, "-")
+            .replace(/\..+/, "") +
+          "_" +
+          this.state.map +
+          "_" +
+          Utils.cleandemo(this.clantag("TERRORIST")) +
+          "-" +
+          Utils.cleandemo(this.clantag("CT")) +
+          ".dem";
+        const that = this;
+        if (this.state.knife) {
+          this.rcon(Rcons.KNIFE_STARTING.format(demo));
+          setTimeout(function() {
+            that.rcon(Rcons.KNIFE_STARTED);
+          }, 9000);
+        } else {
+          this.rcon(Rcons.MATCH_STARTING.format(demo));
+          setTimeout(function() {
+            that.rcon(Rcons.MATCH_STARTED);
+          }, 9000);
+        }
         const message =
           this.stats(false) +
           "\n" +
@@ -521,7 +581,7 @@ module.exports = class Server {
             .join(" ")
             .replace(this.state.map, "*" + this.state.map + "*")
             .replace(/de_/g, "") +
-          "\n*Match resumed*";
+          "\n*Match started*";
         this.cfg.bot.telegramBot.sendMessage(
           this.cfg.nconf.get("telegram:groupId"),
           "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message,
@@ -529,102 +589,37 @@ module.exports = class Server {
             parse_mode: "Markdown"
           }
         );
-      }
-    } else if (!this.state.live) {
-      // if (this.state.setClan.CT === 'CT' || this.state.setClan.TERRORIST === 'TERRORIST') {
-      //   this.rcon('say \x10You must use !team to set set your clantag! For example !team AKL');
-      // } else {
-
-        if (team === true) {
-          this.state.ready.TERRORIST = true;
-          this.state.ready.CT = true;
-        } else {
-            this.state.ready[team] = true;
+        const gotv = this.cfg.nconf.get("gotv");
+        if (gotv[this.cfg.ip][this.cfg.port] !== undefined && Object.keys(this.state.players).length >= 5) {
+          const teams = this.clantag("TERRORIST") + " - " + this.clantag("CT");
+          const channels = this.cfg.nconf.get("irc:channels");
+          for (const i in channels) {
+            if (channels.hasOwnProperty(i)) {
+              this.cfg.bot.ircClient.send(
+                "NOTICE",
+                this.cfg.nconf.get("irc:channels")[i],
+                "Matsi alkaa! (" + teams + ") GOTV osoitteessa " + gotv[this.cfg.ip][this.cfg.port]
+              );
+            }
+          }
         }
-  
-        if (this.state.ready.TERRORIST !== this.state.ready.CT) {
-          this.rcon(
-            Rcons.READY.format(
-              this.state.ready.TERRORIST ? Rcons.T : Rcons.CT,
-              this.state.ready.TERRORIST ? Rcons.CT : Rcons.T
-            )
-          );
-        } else if (this.state.ready.TERRORIST === true && this.state.ready.CT === true) {
-          this.state.live = true;
-          this.state.round = 0;
-          const demo =
-            "matches/" +
-            new Date()
-              .toISOString()
-              .replace(/T/, "_")
-              .replace(/:/g, "-")
-              .replace(/\..+/, "") +
-            "_" +
-            this.state.map +
-            "_" +
-            Utils.cleandemo(this.clantag("TERRORIST")) +
-            "-" +
-            Utils.cleandemo(this.clantag("CT")) +
-            ".dem";
-          const that = this;
-          if (this.state.knife) {
-            this.rcon(Rcons.KNIFE_STARTING.format(demo));
-            setTimeout(function() {
-              that.rcon(Rcons.KNIFE_STARTED);
-            }, 9000);
-          } else {
-            this.rcon(Rcons.MATCH_STARTING.format(demo));
-            setTimeout(function() {
-              that.rcon(Rcons.MATCH_STARTED);
-            }, 9000);
-          }
-          const message =
-            this.stats(false) +
-            "\n" +
-            this.state.maps
-              .join(" ")
-              .replace(this.state.map, "*" + this.state.map + "*")
-              .replace(/de_/g, "") +
-            "\n*Match started*";
-          this.cfg.bot.telegramBot.sendMessage(
-            this.cfg.nconf.get("telegram:groupId"),
-            "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message,
-            {
-              parse_mode: "Markdown"
-            }
-          );
-          const gotv = this.cfg.nconf.get("gotv");
-          if (gotv[this.cfg.ip][this.cfg.port] !== undefined && Object.keys(this.state.players).length >= 5) {
-            const teams = this.clantag("TERRORIST") + " - " + this.clantag("CT");
-            const channels = this.cfg.nconf.get("irc:channels");
-            for (const i in channels) {
-              if (channels.hasOwnProperty(i)) {
-                this.cfg.bot.ircClient.send(
-                  "NOTICE",
-                  this.cfg.nconf.get("irc:channels")[i],
-                  "Matsi alkaa! (" + teams + ") GOTV osoitteessa " + gotv[this.cfg.ip][this.cfg.port]
-                );
-              }
-            }
-          }
-          setTimeout(function() {
-            that.chat(" \x054...");
-          }, 1000);
-          setTimeout(function() {
-            that.chat(" \x063...");
-          }, 2000);
-          setTimeout(function() {
-            that.chat(" \x102...");
-          }, 3000);
-          setTimeout(function() {
-            that.chat(" \x0f1...");
-          }, 4000);
-          setTimeout(function() {
-            that.rcon(Rcons.LIVE);
-            that.rcon('script ScriptPrintMessageCenterAll("Match is LIVE! GL HF!")');
-          }, 5000);
+        setTimeout(function() {
+          that.chat(" \x054...");
+        }, 1000);
+        setTimeout(function() {
+          that.chat(" \x063...");
+        }, 2000);
+        setTimeout(function() {
+          that.chat(" \x102...");
+        }, 3000);
+        setTimeout(function() {
+          that.chat(" \x0f1...");
+        }, 4000);
+        setTimeout(function() {
+          that.rcon(Rcons.LIVE);
+          that.rcon('script ScriptPrintMessageCenterAll("Match is LIVE! GL HF!")');
+        }, 5000);
       }
-      // }
     }
   }
 
