@@ -48,7 +48,7 @@ module.exports = class Server {
       setClan: {
         TERRORIST: 'TERRORIST',
         CT: 'CT',
-      }
+      },
     };
 
     this.setup();
@@ -513,10 +513,9 @@ module.exports = class Server {
         );
       }
     } else if (!this.state.live) {
-      // if (this.state.setClan.CT === 'CT' || this.state.setClan.TERRORIST === 'TERRORIST') {
-      //   this.rcon('say \x10You must use !team to set set your clantag! For example !team AKL');
-      // } else {
-
+      if (this.state.setClan.CT === 'CT' || this.state.setClan.TERRORIST === 'TERRORIST') {
+        this.rcon('say \x10You must use !team to set set your clantag! For example !team AKL');
+      } else {
         if (team === true) {
           this.state.ready.TERRORIST = true;
           this.state.ready.CT = true;
@@ -605,8 +604,8 @@ module.exports = class Server {
             that.rcon(Rcons.LIVE);
             that.rcon('script ScriptPrintMessageCenterAll("Match is LIVE! GL HF!")');
           }, 5000);
+        }
       }
-      // }
     }
   }
 
