@@ -111,7 +111,7 @@ udpServer.on("message", function(msg, info) {
   const addr = info.address + ":" + info.port,
     text = msg.toString();
 
-  console.log("<" + addr + "> " + Utils.clean(text).substring(3));
+  // console.log("<" + addr + "> " + Utils.clean(text).substring(3));
 
   let param, cmd, re, match;
 
@@ -243,9 +243,37 @@ udpServer.on("message", function(msg, info) {
   if (match !== null) {
     const score = {
       TERRORIST: parseInt(match.capture("t_score")),
-      CT: parseInt(match.capture("ct_score"))
+      CT: parseInt(match.capture("ct_score")),
+      WINNER: undefined
     };
     bot.servers[addr].score(score);
+    bot.servers[addr].lastlog = new Date().getTime();
+  }
+  
+  // Map end
+  re = named(/Game Over: .* score (:<ct_score>[0-9].):(:<t_score>[0-9].) after (:<duration>[0-9]+) min/)
+  match = re.exec(text);
+  if (match !== null) {
+    t_score = parseInt(match.capture("t_score"));
+    ct_score = parseInt(match.capture("ct_score"));
+    if (t_score > ct_score){
+      this.state.stats.push({
+        winner: this.state.setClan.TERRORIST,
+        winnerScore: t_score,
+        loser: this.state.setClan.CT,
+        loserScore: ct_score,
+        map: this.state.map
+      });
+    }
+    else {
+      this.state.stats.push({
+        winner: this.state.setClan.CT,
+        winnerScore: ct_score,
+        loser: this.state.setClan.TERRORIST,
+        loserScore: t_score,
+        map: this.state.map
+      });
+    }
     bot.servers[addr].lastlog = new Date().getTime();
   }
 
