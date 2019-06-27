@@ -43,12 +43,12 @@ module.exports = class Server {
       pool: [],
       banned: [],
       picked: [],
-      stats: "",
+      stats: [],
       format: "bo1",
       setClan: {
         TERRORIST: 'TERRORIST',
         CT: 'CT',
-      },
+      }
     };
 
     this.setup();
@@ -222,6 +222,23 @@ module.exports = class Server {
     this.rcon(Rcons.ROUND_STARTED);
     this.state.round++;
   }
+  
+  parseStats() {
+    const team1 = this.clantag("TERRORIST");
+    const team2 = this.clantag("CT");
+    let ret = team1 + " ";
+    let maps = []
+    for (const map in this.state.stats){
+      if (map['winner'] === team1) {
+        ret += map['winnerScore'] + "-" + map['loserScore'] + " ";
+      } else if (map['winner'] === team2) {
+        ret += map['loserScore'] + "-" + map['winnerScore'] + " ";
+      }
+      maps.push(map[map]);
+    }
+    ret += team2 + "\n" + maps.join(" ");
+    return ret;
+  }
 
   // Match end
   win() {
@@ -236,14 +253,15 @@ module.exports = class Server {
       }
     }
 
-    const message =
+    /*const message =
       this.state.stats +
       "\n" +
       this.state.maps
         .join(" ")
         .replace(this.state.map, "*" + this.state.map + "*")
         .replace(/de_/g, "") +
-      "\n*Match ended*";
+      "\n*Match ended*";*/
+    const message = this.parseStats() + "\n *Match ended*";
     this.cfg.bot.telegramBot.sendMessage(
       this.cfg.nconf.get("telegram:groupId"),
       "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message,
@@ -513,9 +531,10 @@ module.exports = class Server {
         );
       }
     } else if (!this.state.live) {
-      if (this.state.setClan.CT === 'CT' || this.state.setClan.TERRORIST === 'TERRORIST') {
-        this.rcon('say \x10You must use !team to set set your clantag! For example !team AKL');
-      } else {
+      // if (this.state.setClan.CT === 'CT' || this.state.setClan.TERRORIST === 'TERRORIST') {
+      //   this.rcon('say \x10You must use !team to set set your clantag! For example !team AKL');
+      // } else {
+
         if (team === true) {
           this.state.ready.TERRORIST = true;
           this.state.ready.CT = true;
@@ -604,8 +623,8 @@ module.exports = class Server {
             that.rcon(Rcons.LIVE);
             that.rcon('script ScriptPrintMessageCenterAll("Match is LIVE! GL HF!")');
           }, 5000);
-        }
       }
+      // }
     }
   }
 

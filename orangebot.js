@@ -256,20 +256,24 @@ udpServer.on("message", function(msg, info) {
   if (match !== null) {
     t_score = parseInt(match.capture("t_score"));
     ct_score = parseInt(match.capture("ct_score"));
-    let winner;
     if (t_score > ct_score){
-      winner = this.state.setClan.TERRORIST;
+      this.state.stats.push({
+        winner: this.state.setClan.TERRORIST,
+        winnerScore: t_score,
+        loser: this.state.setClan.CT,
+        loserScore: ct_score,
+        map: this.state.map
+      });
     }
     else {
-      winner = this.state.setClan.CT;
+      this.state.stats.push({
+        winner: this.state.setClan.CT,
+        winnerScore: ct_score,
+        loser: this.state.setClan.TERRORIST,
+        loserScore: t_score,
+        map: this.state.map
+      });
     }
-
-    const score = {
-      TERRORIST: t_score,
-      CT: ct_score,
-      WINNER: winner
-    };
-    bot.servers[addr].score(score);
     bot.servers[addr].lastlog = new Date().getTime();
   }
 
