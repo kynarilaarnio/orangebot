@@ -243,7 +243,31 @@ udpServer.on("message", function(msg, info) {
   if (match !== null) {
     const score = {
       TERRORIST: parseInt(match.capture("t_score")),
-      CT: parseInt(match.capture("ct_score"))
+      CT: parseInt(match.capture("ct_score")),
+      WINNER: undefined
+    };
+    bot.servers[addr].score(score);
+    bot.servers[addr].lastlog = new Date().getTime();
+  }
+  
+  // Map end
+  re = named(/Game Over: .* score (:<ct_score>[0-9].):(:<t_score>[0-9].) after (:<duration>[0-9]+) min/)
+  match = re.exec(text);
+  if (match !== null) {
+    t_score = parseInt(match.capture("t_score"));
+    ct_score = parseInt(match.capture("ct_score"));
+    let winner;
+    if (t_score > ct_score){
+      winner = this.state.setClan.TERRORIST;
+    }
+    else {
+      winner = this.state.setClan.CT;
+    }
+
+    const score = {
+      TERRORIST: t_score,
+      CT: ct_score,
+      WINNER: winner
     };
     bot.servers[addr].score(score);
     bot.servers[addr].lastlog = new Date().getTime();
