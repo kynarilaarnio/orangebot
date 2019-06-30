@@ -157,6 +157,22 @@ udpServer.on("message", function(msg, info) {
     }
   }
 
+  // Halftime
+  re = named(/World triggered "Announce_Phase_End"/);
+  match = re.exec(text);
+  if (match !== null) {
+    console.log('phase_end')
+    // bot.servers[addr].halftime();
+  }
+
+
+  re = named(/World triggered "Start_Halftime"/);
+  match = re.exec(text);
+  if (match !== null) {
+    console.log('start_halftime');
+    bot.servers[addr].halftime();
+  }
+
   // Join to a team
   re = named(
     /"(:<user_name>.+)[<](:<user_id>\d+)[>][<](:<steam_id>.*)[>]" switched from team [<](:<user_team>CT|TERRORIST|Unassigned|Spectator)[>] to [<](:<new_team>CT|TERRORIST|Unassigned|Spectator)[>]/
@@ -180,16 +196,16 @@ udpServer.on("message", function(msg, info) {
   }
 
   // Clantag
-  re = named(/Team playing "(:<team>CT|TERRORIST)": (:<clan_tag>.+)/)
-  match = re.exec(text);
-  if (match !== null) {
-    if (match.capture("team") === 'TERRORIST') {
-      bot.servers[addr].state.setClan.TERRORIST = match.capture("clan_tag");
-    } else if (match.capture("team") === 'CT') {
-      bot.servers[addr].state.setClan.CT = match.capture("clan_tag");
-    }
-    bot.servers[addr].lastlog = new Date().getTime();
-  }
+  // re = named(/Team playing "(:<team>CT|TERRORIST)": (:<clan_tag>.+)/)
+  // match = re.exec(text);
+  // if (match !== null) {
+  //   if (match.capture("team") === 'TERRORIST') {
+  //     bot.servers[addr].state.setClan.TERRORIST = match.capture("clan_tag");
+  //   } else if (match.capture("team") === 'CT') {
+  //     bot.servers[addr].state.setClan.CT = match.capture("clan_tag");
+  //   }
+  //   bot.servers[addr].lastlog = new Date().getTime();
+  // }
   
 
   // Disconnect
@@ -244,36 +260,20 @@ udpServer.on("message", function(msg, info) {
     const score = {
       TERRORIST: parseInt(match.capture("t_score")),
       CT: parseInt(match.capture("ct_score")),
-      WINNER: undefined
     };
     bot.servers[addr].score(score);
     bot.servers[addr].lastlog = new Date().getTime();
   }
 
   // Map end xd
-  re = named(/Game Over: .* score (:<ct_score>[0-9].):(:<t_score>[0-9].) after (:<duration>[0-9]+) min/)
+  re = named(/Game Over:.*score (:<ct_score>[0-9].):(:<t_score>[0-9].) after (:<duration>[0-9]+) min/)
   match = re.exec(text);
   if (match !== null) {
     t_score = parseInt(match.capture("t_score"));
     ct_score = parseInt(match.capture("ct_score"));
-    if (t_score > ct_score){
-      this.state.stats.push({
-        winner: this.state.setClan.TERRORIST,
-        winnerScore: t_score,
-        loser: this.state.setClan.CT,
-        loserScore: ct_score,
-        map: this.state.map
-      });
-    }
-    else {
-      this.state.stats.push({
-        winner: this.state.setClan.CT,
-        winnerScore: ct_score,
-        loser: this.state.setClan.TERRORIST,
-        loserScore: t_score,
-        map: this.state.map
-      });
-    }
+    bot.servers[addr].mapEnd(t_score, ct_score);
+    console.log(t_score);
+    console.log(ct_score);
     bot.servers[addr].lastlog = new Date().getTime();
   }
 

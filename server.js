@@ -44,10 +44,11 @@ module.exports = class Server {
       banned: [],
       picked: [],
       stats: [],
+      statsV2: [],
       format: "bo1",
       setClan: {
-        TERRORIST: 'TERRORIST',
-        CT: 'CT',
+        TERRORIST: 'Terrorists',
+        CT: 'Counter-Terrorists',
       }
     };
 
@@ -115,15 +116,6 @@ module.exports = class Server {
         console.error(err);
       })
       .connect();
-  }
-
-  // Try solve team name
-  clantag(team) {
-    if (team === 'TERRORIST') {
-      return this.state.setClan.TERRORIST
-    } else if (team === 'CT') {
-      return this.state.setClan.CT
-    }
   }
 
   // Call admin via Telegram
@@ -222,36 +214,63 @@ module.exports = class Server {
     this.rcon(Rcons.ROUND_STARTED);
     this.state.round++;
   }
-  
+ 
+  // Map end
+  mapEnd(t_score, ct_score) {
+    console.log('MapEnd');
+    if (t_score > ct_score){
+      Array.prototype.push.apply(this.state.statsV2, {
+        winner: this.state.setClan.TERRORIST,
+        winnerScore: t_score,
+        loser: this.state.setClan.CT,
+        loserScore: ct_score,
+        map: this.state.map
+      })
+    } else {
+      Array.prototype.push.apply(this.state.statsV2, {
+        winner: this.state.setClan.CT,
+        winnerScore: ct_score,
+        loser: this.state.setClan.TERRORIST,
+        loserScore: t_score,
+        map: this.state.map
+      })
+    }
+    console.log(this.state.statsV2);
+  }
+
   parseStats() {
     const team1 = this.clantag("TERRORIST");
     const team2 = this.clantag("CT");
-    let ret = team1 + " ";
-    let maps = []
-    for (const map in this.state.stats){
-      if (map['winner'] === team1) {
-        ret += map['winnerScore'] + "-" + map['loserScore'] + " ";
-      } else if (map['winner'] === team2) {
-        ret += map['loserScore'] + "-" + map['winnerScore'] + " ";
+    const stats = this.state.statsV2;
+    console.log(stats);
+    let msg = `${team1} `;
+    const maps = [];
+    Array.prototype.forEach.call(stats, map => {
+      if (map.winner === team1){
+        msg += `${map.winnerScore} - ${map.loserScore} `;
+      } else {
+        msg += `${map.loserScore} - ${map.winnerScore} `;
       }
-      maps.push(map[map]);
+      maps.push(map.map); 
+     })
+      
+    msg += `${team2} \n ${maps.join(' ')}`;
+    return msg;
     }
-    ret += team2 + "\n" + maps.join(" ");
-    return ret;
-  }
 
+  
   // Match end
   win() {
-    const channels = this.cfg.nconf.get("irc:channels");
-    for (const i in channels) {
-      if (channels.hasOwnProperty(i)) {
-        this.cfg.bot.ircClient.send(
-          "NOTICE",
-          this.cfg.nconf.get("irc:channels")[i],
-          "Matsi päättyi! (" + this.state.stats + ")"
-        );
-      }
-    }
+    // const channels = this.cfg.nconf.get("irc:channels");
+    // for (const i in channels) {
+    //   if (channels.hasOwnProperty(i)) {
+    //     this.cfg.bot.ircClient.send(
+    //       "NOTICE",
+    //       this.cfg.nconf.get("irc:channels")[i],
+    //       "Matsi päättyi! (" + this.state.stats + ")"
+    //     );
+    //   }
+    // }
 
     /*const message =
       this.state.stats +
@@ -261,6 +280,8 @@ module.exports = class Server {
         .replace(this.state.map, "*" + this.state.map + "*")
         .replace(/de_/g, "") +
       "\n*Match ended*";*/
+
+
     const message = this.parseStats() + "\n *Match ended*";
     this.cfg.bot.telegramBot.sendMessage(
       this.cfg.nconf.get("telegram:groupId"),
@@ -360,8 +381,18 @@ module.exports = class Server {
     }
   }
 
+  // Try solve team name
+  clantag(team) {
+    if (team === 'TERRORIST') {
+      return this.state.setClan.TERRORIST
+    } else if (team === 'CT') {
+      return this.state.setClan.CT
+    }
+  }
+
   // Set clantag
   setClanName(clanName, team) {
+    if (this.state.live) return;
     if (team === 'TERRORIST') {
       this.rcon(`mp_teamname_2 ${clanName}`);
       this.state.setClan.TERRORIST = clanName;
@@ -369,6 +400,23 @@ module.exports = class Server {
       this.rcon(`mp_teamname_1 ${clanName}`);
       this.state.setClan.CT = clanName;
     }
+  }
+
+  // Halftime
+  halftime() {
+    console.log(this.state.live)
+    console.log('Halftime 1')
+    if (!this.state.live) {
+      return;
+    }
+    console.log('Halftime 2')
+    const ct_clan = this.state.setClan.CT;
+    const t_clan = this.state.setClan.TERRORIST;
+    this.state.setClan = {
+      TERRORIST: ct_clan,
+      CT: t_clan
+    }
+    console.log(this.state.setClan);
   }
 
   // Pick map
@@ -531,11 +579,17 @@ module.exports = class Server {
       );
     }
   } else if (!this.state.live) {
+    if (this.state.setClan[team] === 'Counter-Terrorists' || this.state.setClan[team] === 'Terrorists') {
+      this.rcon(`say Team ${team} does not have a clan tag! Use !team to set your clantag!`)
+      return;
+    }
       if (team === true) {
+        // When does this even fire???
+        console.log('FIRED')
         this.state.ready.TERRORIST = true;
         this.state.ready.CT = true;
       } else {
-          this.state.ready[team] = true;
+        this.state.ready[team] = true;
       }
 
       if (this.state.ready.TERRORIST !== this.state.ready.CT) {
@@ -558,9 +612,9 @@ module.exports = class Server {
           "_" +
           this.state.map +
           "_" +
-          Utils.cleandemo(this.clantag("TERRORIST")) +
+          this.clantag("TERRORIST") +
           "-" +
-          Utils.cleandemo(this.clantag("CT")) +
+          this.clantag("CT") +
           ".dem";
         const that = this;
         if (this.state.knife) {
@@ -687,6 +741,7 @@ module.exports = class Server {
       this.state.knifewinner = false;
     }
   }
+  
 
   // Swap current tems
   swap(team) {
@@ -694,6 +749,14 @@ module.exports = class Server {
       this.state.round = 0;
       this.rcon(Rcons.KNIFE_SWAP);
       this.state.knifewinner = false;
+
+      const ct_clan = this.state.setClan.CT;
+      const t_clan = this.state.setClan.TERRORIST;
+      this.state.setClan = {
+        TERRORIST: ct_clan,
+        CT: t_clan
+      }
+      console.log(this.state.setClan);
     }
   }
 
@@ -728,7 +791,11 @@ module.exports = class Server {
         ", pool: " +
         this.state.pool.join(",") +
         ", format: " +
-        this.state.format
+        this.state.format +
+        ", CT_Clan: " +
+        this.state.setClan.CT + 
+        ", T_Clan: " +
+        this.state.setClan.TERRORIST
     );
     this.stats(true);
   }
@@ -763,9 +830,11 @@ module.exports = class Server {
     this.state.banner = "";
     this.state.round = 0;
     this.state.setClan = {
-      TERRORIST: 'TERRORIST',
-      CT: 'CT',
+      TERRORIST: 'Terrorists',
+      CT: 'Counter-Terrorists',
     };
+    this.rcon('mp_teamname_1 Counter-Terrorists');
+    this.rcon('mp_teamname_2 Terrorists');
     this.rcon(Rcons.CONFIG);
   }
 };
