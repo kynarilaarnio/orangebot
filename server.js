@@ -235,7 +235,7 @@ module.exports = class Server {
         map: this.state.map
       }])
     }
-    this.win();
+    setTimeout(() => {this.win();}, 5000);
   }
 
   parseStats() {

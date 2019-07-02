@@ -158,20 +158,20 @@ udpServer.on("message", function(msg, info) {
   }
 
   // Halftime
-  // re = named(/World triggered "Announce_Phase_End"/);
-  // match = re.exec(text);
-  // if (match !== null) {
-  //   console.log('phase_end')
-  //   // bot.servers[addr].halftime();
-  // }
+  re = named(/World triggered "Announce_Phase_End"/);
+  match = re.exec(text);
+  if (match !== null) {
+    console.log('phase_end')
+    // bot.servers[addr].halftime();
+  }
 
 
-  // re = named(/World triggered "Start_Halftime"/);
-  // match = re.exec(text);
-  // if (match !== null) {
-  //   console.log('start_halftime');
-  //   bot.servers[addr].halftime();
-  // }
+  re = named(/World triggered "Start_Halftime"/);
+  match = re.exec(text);
+  if (match !== null) {
+    console.log('start_halftime');
+    bot.servers[addr].halftime();
+  }
 
   // Join to a team
   re = named(
@@ -253,10 +253,16 @@ udpServer.on("message", function(msg, info) {
     /Team "(:<team>.*)" triggered "SFUI_Notice_(:<team_win>Terrorists_Win|CTs_Win|Target_Bombed|Target_Saved|Bomb_Defused)" \(CT "(:<ct_score>\d+)"\) \(T "(:<t_score>\d+)"\)/
   );
   match = re.exec(text);
+  const t_score = parseInt(match.capture("t_score"));
+  const ct_score = parseInt(match.capture("ct_score"));
+
+  if (ct_score + t_score === 15){bot.servers[addr].halftime();}
+  else if (ct_score + t_score + 3 % 6 === 0){bot.servers[addr].halftime();}
+  
   if (match !== null) {
     const score = {
-      TERRORIST: parseInt(match.capture("t_score")),
-      CT: parseInt(match.capture("ct_score")),
+      TERRORIST: t_score,
+      CT: ct_score,
     };
     bot.servers[addr].score(score);
     bot.servers[addr].lastlog = new Date().getTime();
