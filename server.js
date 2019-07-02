@@ -219,31 +219,30 @@ module.exports = class Server {
   mapEnd(t_score, ct_score) {
     console.log('MapEnd');
     if (t_score > ct_score){
-      Array.prototype.push.apply(this.state.statsV2, {
+      Array.prototype.push.apply(this.state.statsV2, [{
         winner: this.state.setClan.TERRORIST,
         winnerScore: t_score,
         loser: this.state.setClan.CT,
         loserScore: ct_score,
         map: this.state.map
-      })
+      }])
     } else {
-      Array.prototype.push.apply(this.state.statsV2, {
+      Array.prototype.push.apply(this.state.statsV2, [{
         winner: this.state.setClan.CT,
         winnerScore: ct_score,
         loser: this.state.setClan.TERRORIST,
         loserScore: t_score,
         map: this.state.map
-      })
+      }])
     }
     this.win();
-    console.log(this.state.statsV2);
   }
 
   parseStats() {
     const team1 = this.clantag("TERRORIST");
     const team2 = this.clantag("CT");
     const stats = this.state.statsV2;
-    console.log(stats);
+    console.log('stats: ', stats);
     let msg = `${team1} `;
     const maps = [];
     Array.prototype.forEach.call(stats, map => {

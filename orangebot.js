@@ -158,20 +158,20 @@ udpServer.on("message", function(msg, info) {
   }
 
   // Halftime
-  re = named(/World triggered "Announce_Phase_End"/);
-  match = re.exec(text);
-  if (match !== null) {
-    console.log('phase_end')
-    // bot.servers[addr].halftime();
-  }
+  // re = named(/World triggered "Announce_Phase_End"/);
+  // match = re.exec(text);
+  // if (match !== null) {
+  //   console.log('phase_end')
+  //   // bot.servers[addr].halftime();
+  // }
 
 
-  re = named(/World triggered "Start_Halftime"/);
-  match = re.exec(text);
-  if (match !== null) {
-    console.log('start_halftime');
-    bot.servers[addr].halftime();
-  }
+  // re = named(/World triggered "Start_Halftime"/);
+  // match = re.exec(text);
+  // if (match !== null) {
+  //   console.log('start_halftime');
+  //   bot.servers[addr].halftime();
+  // }
 
   // Join to a team
   re = named(
