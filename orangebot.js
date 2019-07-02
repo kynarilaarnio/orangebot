@@ -111,7 +111,7 @@ udpServer.on("message", function(msg, info) {
   const addr = info.address + ":" + info.port,
     text = msg.toString();
 
-  // console.log("<" + addr + "> " + Utils.clean(text).substring(3));
+  console.log("<" + addr + "> " + Utils.clean(text).substring(3));
 
   let param, cmd, re, match;
 
@@ -229,9 +229,6 @@ udpServer.on("message", function(msg, info) {
         delete bot.servers[addr].state.players[prop];
       }
     }
-    if (bot.servers[addr].state.round > 14) {
-      bot.servers[addr].win();
-    }
     bot.servers[addr].lastlog = new Date().getTime();
   }
 
@@ -266,11 +263,11 @@ udpServer.on("message", function(msg, info) {
   }
 
   // Map end xd
-  re = named(/Game Over:.*score (:<ct_score>[0-9].):(:<t_score>[0-9].) after (:<duration>[0-9]+) min/)
+  re = named(/Game Over:.*score (:<ct_score>\d+):(:<t_score>\d+).*/)
   match = re.exec(text);
   if (match !== null) {
-    t_score = parseInt(match.capture("t_score"));
-    ct_score = parseInt(match.capture("ct_score"));
+    const t_score = parseInt(match.capture("t_score"));
+    const ct_score = parseInt(match.capture("ct_score"));
     bot.servers[addr].mapEnd(t_score, ct_score);
     console.log(t_score);
     console.log(ct_score);

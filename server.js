@@ -235,6 +235,7 @@ module.exports = class Server {
         map: this.state.map
       })
     }
+    this.win();
     console.log(this.state.statsV2);
   }
 
