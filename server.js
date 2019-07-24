@@ -285,10 +285,7 @@ module.exports = class Server {
     const message = this.parseStats() + "\n *Match ended*";
     this.cfg.bot.telegramBot.sendMessage(
       this.cfg.nconf.get("telegram:groupId"),
-      "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message,
-      {
-        parse_mode: "Markdown"
-      }
+      "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message
     );
   }
 
@@ -339,7 +336,7 @@ module.exports = class Server {
             that.state.map = map;
           }
 
-          that.stats(false);
+          that.stats(false); 
         }
 
         // ???
@@ -365,6 +362,15 @@ module.exports = class Server {
   // Start match
   start(maps) {
     this.state.score = [];
+
+    this.state.statsV2 = [];
+    this.state.setClan = {
+      TERRORIST: 'Terrorists',
+      CT: 'Counter-Terrorists',
+    };
+    this.rcon('mp_teamname_1 Counter-Terrorists');
+    this.rcon('mp_teamname_2 Terrorists');
+
     if (maps.length > 0) {
       this.state.maps = maps;
       if (this.state.map !== maps[0]) {
@@ -572,10 +578,7 @@ module.exports = class Server {
         "\n*Match resumed*";
       this.cfg.bot.telegramBot.sendMessage(
         this.cfg.nconf.get("telegram:groupId"),
-        "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message,
-        {
-          parse_mode: "Markdown"
-        }
+        "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message
       );
     }
   } else if (!this.state.live) {
@@ -638,10 +641,7 @@ module.exports = class Server {
           "\n*Match started*";
         this.cfg.bot.telegramBot.sendMessage(
           this.cfg.nconf.get("telegram:groupId"),
-          "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message,
-          {
-            parse_mode: "Markdown"
-          }
+          "*Console@" + this.cfg.ip + ":" + this.cfg.port + "*\n" + message
         );
         const gotv = this.cfg.nconf.get("gotv");
         if (gotv[this.cfg.ip][this.cfg.port] !== undefined && Object.keys(this.state.players).length >= 5) {
@@ -829,12 +829,6 @@ module.exports = class Server {
     this.state.pool = [];
     this.state.banner = "";
     this.state.round = 0;
-    this.state.setClan = {
-      TERRORIST: 'Terrorists',
-      CT: 'Counter-Terrorists',
-    };
-    this.rcon('mp_teamname_1 Counter-Terrorists');
-    this.rcon('mp_teamname_2 Terrorists');
     this.rcon(Rcons.CONFIG);
   }
 };
