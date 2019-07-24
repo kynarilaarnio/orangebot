@@ -408,11 +408,12 @@ module.exports = class Server {
   setClanName(clanName, team) {
     if (this.state.live) return;
     if (team === 'TERRORIST') {
-      this.rcon(`mp_teamname_2 ${clanName}`);
-      this.state.setClan.TERRORIST = clanName;
+      // Nää on jostain syysta tauluja ???? siksi [0]
+      this.rcon(`mp_teamname_2 ${clanName[0]}`);
+      this.state.setClan.TERRORIST = clanName[0];
     } else if (team === 'CT') {
-      this.rcon(`mp_teamname_1 ${clanName}`);
-      this.state.setClan.CT = clanName;
+      this.rcon(`mp_teamname_1 ${clanName[0]}`);
+      this.state.setClan.CT = clanName[0];
     }
   }
 
@@ -844,7 +845,7 @@ module.exports = class Server {
     };
     this.rcon('mp_teamname_1 Counter-Terrorists');
     this.rcon('mp_teamname_2 Terrorists');
-    
+
     this.rcon(Rcons.CONFIG);
   }
 };
