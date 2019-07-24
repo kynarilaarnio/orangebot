@@ -248,8 +248,22 @@ module.exports = class Server {
     Array.prototype.forEach.call(stats, map => {
       if (map.winner === team1){
         msg += `${map.winnerScore} - ${map.loserScore} `;
-      } else {
+      } else if (map.winner === team2) {
         msg += `${map.loserScore} - ${map.winnerScore} `;
+      } else {
+        console.log('FIRED!');
+        console.log('stasts: ', map);
+        console.log('team 1: ', team1);
+        console.log('map winner: ', map.winner);
+        console.log('team 2: ', team2);
+        console.log('map loser: ', map.loser);
+
+        console.log('team1 === map.winner', team1 === map.winner);
+        console.log('team2 === map.winner', team2 === map.winner);
+
+        console.log('team1 === map.winner', team1 === map.loser);
+        console.log('team2 === map.winner', team2 === map.loser);
+        msg += 'Taa on paskana pojat'
       }
       maps.push(map.map); 
      })
@@ -364,12 +378,6 @@ module.exports = class Server {
     this.state.score = [];
 
     this.state.statsV2 = [];
-    this.state.setClan = {
-      TERRORIST: 'Terrorists',
-      CT: 'Counter-Terrorists',
-    };
-    this.rcon('mp_teamname_1 Counter-Terrorists');
-    this.rcon('mp_teamname_2 Terrorists');
 
     if (maps.length > 0) {
       this.state.maps = maps;
@@ -829,6 +837,14 @@ module.exports = class Server {
     this.state.pool = [];
     this.state.banner = "";
     this.state.round = 0;
+
+    this.state.setClan = {
+      TERRORIST: 'Terrorists',
+      CT: 'Counter-Terrorists',
+    };
+    this.rcon('mp_teamname_1 Counter-Terrorists');
+    this.rcon('mp_teamname_2 Terrorists');
+    
     this.rcon(Rcons.CONFIG);
   }
 };
