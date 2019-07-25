@@ -379,6 +379,13 @@ module.exports = class Server {
 
     this.state.statsV2 = [];
 
+    this.state.setClan = {
+      TERRORIST: 'Terrorists',
+      CT: 'Counter-Terrorists',
+    };
+    this.rcon('mp_teamname_1 Counter-Terrorists');
+    this.rcon('mp_teamname_2 Terrorists');
+
     if (maps.length > 0) {
       this.state.maps = maps;
       if (this.state.map !== maps[0]) {
@@ -838,13 +845,6 @@ module.exports = class Server {
     this.state.pool = [];
     this.state.banner = "";
     this.state.round = 0;
-
-    this.state.setClan = {
-      TERRORIST: 'Terrorists',
-      CT: 'Counter-Terrorists',
-    };
-    this.rcon('mp_teamname_1 Counter-Terrorists');
-    this.rcon('mp_teamname_2 Terrorists');
 
     this.rcon(Rcons.CONFIG);
   }

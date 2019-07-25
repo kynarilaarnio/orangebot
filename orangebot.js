@@ -145,6 +145,9 @@ udpServer.on("message", function(msg, info) {
           bot.servers[addr].chat(" \x10" + conName + " (connecting) is a registered user.");
         } else if (Utils.whitelisted(conId, whitelist)) {
           bot.servers[addr].chat(" \x10" + conName + " (connecting) is whitelisted.");
+        } else if (response.statusCode === 504) {
+          bot.servers[addr].chat(" \x10Letting " + conName + " connect because AKL API is not responding.");
+          return;
         } else {
           bot.servers[addr].chat(" \x10" + conName + " tried to connect, but is not registered.");
           bot.servers[addr].rcon("kickid " + conId + " This account is not registered on akl.gg");
