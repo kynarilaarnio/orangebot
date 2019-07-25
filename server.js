@@ -414,6 +414,12 @@ module.exports = class Server {
   // Set clantag
   setClanName(clanName, team) {
     if (this.state.live) return;
+    if (this.state.format === 'bo3'){
+      if (this.state.statsV2.length > 0){
+        this.rcon('say You can\'t change team names during best of 3\'s');
+        return;
+      }
+    }
     if (team === 'TERRORIST') {
       // Nää on jostain syysta tauluja ???? siksi [0]
       this.rcon(`mp_teamname_2 ${clanName[0]}`);
