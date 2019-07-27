@@ -853,5 +853,10 @@ module.exports = class Server {
     this.state.round = 0;
 
     this.rcon(Rcons.CONFIG);
+
+    this.rcon(`mp_teamname_1 ${this.state.setClan.CT}`);
+    this.rcon(`mp_teamname_2 ${this.state.setClan.TERRORIST}`);
+    console.log(this.state.setClan.CT);
+    console.log(this.state.setClan.TERRORIST);
   }
 };
