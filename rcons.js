@@ -1,6 +1,6 @@
 module.exports = {
   WARMUP:
-    'script ScriptPrintMessageChatAll(" \x10Ready to play? Start a \x06map veto\x10 with \x06!start\x10 or start a \x06live\x10 match in current map with \x06!ready\x10.");script ScriptPrintMessageChatAll(" \x0eYou can restart a veto if you fuck up, but you can\'t reset a match without an !admin. ");script ScriptPrintMessageChatAll(" \x10You can also use \x06!team\x10 to set your clantag! For example, !team AKL. \x06DO NOT CHANGE YOUR TEAM NAME IN THE MIDDLE OF THE GAME!\x10");script ScriptPrintMessageChatAll("\x02 You can switch between bo1 and bo3 modes by typing !bo1 or !bo3.")',
+    'script ScriptPrintMessageChatAll(" \x10Ready to play? Start a \x06map veto\x10 with \x06!start\x10 or start a \x06live\x10 match in current map with \x06!ready\x10.");script ScriptPrintMessageChatAll(" \x0eYou can restart a veto if you fuck up, but you can\'t reset a match without an !admin. ");script ScriptPrintMessageChatAll(" \x10You can also use \x06!team\x10 to set your clantag! For example, !team AKL. \x06DO NOT CHANGE YOUR TEAM NAME IN THE MIDDLE OF THE GAME!\x10");script ScriptPrintMessageChatAll("\x02 You can switch between bo1 and bo3 modes by typing !bo1 or !bo3. ")',
   WARMUP_KNIFE: "say \x10Knife round will start when both teams are \x06!ready\x10",
   KNIFE_DISABLED: 'script ScriptPrintMessageChatAll(" \x10Cancelled knife round.")',
   KNIFE_STARTING:

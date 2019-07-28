@@ -169,6 +169,7 @@ module.exports = class Server {
       this.state.stats = out;
     }
 
+    console.log(out);
     return out
       .replace(/\x10/g, "")
       .replace(/\x06/g, "")
