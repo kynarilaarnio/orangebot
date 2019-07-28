@@ -248,9 +248,9 @@ module.exports = class Server {
     const maps = [];
     Array.prototype.forEach.call(stats, map => {
       if (map.winner === team1){
-        msg += `${map.winnerScore} - ${map.loserScore} `;
+        msg += `${map.winnerScore}-${map.loserScore} `;
       } else if (map.winner === team2) {
-        msg += `${map.loserScore} - ${map.winnerScore} `;
+        msg += `${map.loserScore}-${map.winnerScore} `;
       } else {
         console.log('FIRED!');
         console.log('stasts: ', map);
