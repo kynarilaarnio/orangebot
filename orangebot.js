@@ -143,8 +143,11 @@ udpServer.on("message", function(msg, info) {
 
         if (response.statusCode === 200) {
           bot.servers[addr].chat(" \x10" + conName + " (connecting) is a registered user.");
-        } else if (Utils.whitelisted(conId)) {
+        } else if (Utils.whitelisted(conId, whitelist)) {
           bot.servers[addr].chat(" \x10" + conName + " (connecting) is whitelisted.");
+        } else if (response.statusCode === 504) {
+          bot.servers[addr].chat(" \x10Letting " + conName + " connect because AKL API is not responding.");
+          return;
         } else {
           bot.servers[addr].chat(" \x10" + conName + " tried to connect, but is not registered.");
           bot.servers[addr].rcon("kickid " + conId + " This account is not registered on akl.gg");
@@ -156,6 +159,22 @@ udpServer.on("message", function(msg, info) {
       });
     }
   }
+
+  // Halftime
+  // re = named(/World triggered "Announce_Phase_End"/);
+  // match = re.exec(text);
+  // if (match !== null) {
+  //   console.log('phase_end')
+  //   // bot.servers[addr].halftime();
+  // }
+
+
+  // re = named(/World triggered "Start_Halftime"/);
+  // match = re.exec(text);
+  // if (match !== null) {
+  //   console.log('start_halftime');
+  //   bot.servers[addr].halftime();
+  // }
 
   // Join to a team
   re = named(
@@ -180,16 +199,16 @@ udpServer.on("message", function(msg, info) {
   }
 
   // Clantag
-  re = named(/Team playing "(:<team>CT|TERRORIST)": (:<clan_tag>.+)/)
-  match = re.exec(text);
-  if (match !== null) {
-    Object.keys(bot.servers[addr].state.players).forEach((key) => {
-      if (bot.servers[addr].state.players[key].team === match.capture("team")){
-        bot.servers[addr].state.players[key].clantag = match.capture("clan_tag");
-      }
-    });
-    bot.servers[addr].lastlog = new Date().getTime();
-  }
+  // re = named(/Team playing "(:<team>CT|TERRORIST)": (:<clan_tag>.+)/)
+  // match = re.exec(text);
+  // if (match !== null) {
+  //   if (match.capture("team") === 'TERRORIST') {
+  //     bot.servers[addr].state.setClan.TERRORIST = match.capture("clan_tag");
+  //   } else if (match.capture("team") === 'CT') {
+  //     bot.servers[addr].state.setClan.CT = match.capture("clan_tag");
+  //   }
+  //   bot.servers[addr].lastlog = new Date().getTime();
+  // }
   
 
   // Disconnect
@@ -212,9 +231,6 @@ udpServer.on("message", function(msg, info) {
       if (bot.servers[addr].state.players.hasOwnProperty(prop)) {
         delete bot.servers[addr].state.players[prop];
       }
-    }
-    if (bot.servers[addr].state.round > 14) {
-      bot.servers[addr].win();
     }
     bot.servers[addr].lastlog = new Date().getTime();
   }
@@ -241,11 +257,29 @@ udpServer.on("message", function(msg, info) {
   );
   match = re.exec(text);
   if (match !== null) {
+    const t_score = parseInt(match.capture("t_score"));
+    const ct_score = parseInt(match.capture("ct_score"));
+    if (ct_score + t_score === 15){bot.servers[addr].halftime();}
+    else if (ct_score + t_score + 3 % 6 === 0){bot.servers[addr].halftime();}
+
+    
     const score = {
-      TERRORIST: parseInt(match.capture("t_score")),
-      CT: parseInt(match.capture("ct_score"))
+      TERRORIST: t_score,
+      CT: ct_score,
     };
     bot.servers[addr].score(score);
+    bot.servers[addr].lastlog = new Date().getTime();
+  }
+
+  // Map end xd
+  re = named(/Game Over:.*score (:<ct_score>\d+):(:<t_score>\d+).*/)
+  match = re.exec(text);
+  if (match !== null) {
+    const t_score = parseInt(match.capture("t_score"));
+    const ct_score = parseInt(match.capture("ct_score"));
+    bot.servers[addr].mapEnd(t_score, ct_score);
+    console.log(t_score);
+    console.log(ct_score);
     bot.servers[addr].lastlog = new Date().getTime();
   }
 
@@ -348,13 +382,16 @@ udpServer.on("message", function(msg, info) {
         bot.servers[addr].pick(param, match.capture("user_team"));
         break;
       case "bo1":
-        if (isAdmin) bot.servers[addr].matchformat("bo1");
+        bot.servers[addr].matchformat("bo1");
         break;
       case "bo3":
-        if (isAdmin) bot.servers[addr].matchformat("bo3");
+        bot.servers[addr].matchformat("bo3");
         break;
       case "matchformat":
         if (isAdmin) bot.servers[addr].matchformat(param[0]);
+        break;
+      case "team":
+         bot.servers[addr].setClanName(param, match.capture("user_team"));
         break;
       default:
         break;

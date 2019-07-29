@@ -20,23 +20,24 @@ function cleansay(str) {
 }
 
 function shuffle(array) {
-  let m = array.length,
-    t,
-    i;
+  var currentIndex = array.length, temporaryValue, randomIndex;
 
-  // While there remain elements to shuffle
-  while (m) {
-    // Pick a remaining element
-    i = Math.floor(Math.random() * m--);
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
 
-    // And swap it with the current element
-    t = array[m];
-    array[m] = array[i];
-    array[i] = t;
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
   }
 
   return array;
 }
+
 
 function getRandom(arr) {
   const newArr = arr.slice(0);
@@ -44,7 +45,7 @@ function getRandom(arr) {
   return newArr[0];
 }
 
-function whitelisted(steamid) {
+function whitelisted(steamid, whitelist) {
   for (const i in whitelist) {
     if (whitelist.hasOwnProperty(i) && id64(whitelist[i]) === id64(steamid)) {
       return true;
